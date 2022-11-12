@@ -1,0 +1,46 @@
+import esphome.codegen as cg
+import esphome.config_validation as cv
+from esphome.components import sensor, ble_client
+
+from esphome.const import (
+    DEVICE_CLASS_TEMPERATURE,
+    STATE_CLASS_MEASUREMENT,
+    UNIT_CELSIUS,
+    CONF_ID,
+    CONF_TEMPERATURE,
+)
+
+DEPENDENCIES = ["ble_client"]
+
+igrill_ns = cg.esphome_ns.namespace("igrill")
+IGrill = igrill_ns.class_(
+    "IGrill", cg.PollingComponent, ble_client.BLEClientNode
+)
+
+
+CONFIG_SCHEMA = cv.All(
+    cv.Schema(
+        {
+            cv.GenerateID(): cv.declare_id(IGrill),
+            cv.Optional(CONF_TEMPERATURE): sensor.sensor_schema(
+                unit_of_measurement=UNIT_CELSIUS,
+                accuracy_decimals=2,
+                device_class=DEVICE_CLASS_TEMPERATURE,
+                state_class=STATE_CLASS_MEASUREMENT,
+            ),
+        }
+    )
+    .extend(cv.polling_component_schema("5min"))
+    .extend(ble_client.BLE_CLIENT_SCHEMA),
+)
+
+
+async def to_code(config):
+    var = cg.new_Pvariable(config[CONF_ID])
+    await cg.register_component(var, config)
+
+    await ble_client.register_ble_node(var, config)
+
+    if CONF_TEMPERATURE in config:
+        sens = await sensor.new_sensor(config[CONF_TEMPERATURE])
+        cg.add(var.set_temperature(sens))
