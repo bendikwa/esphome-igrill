@@ -41,3 +41,5 @@ lib
 .pio
 platformio.ini
 components/igrill/main.cpp
+CMakeLists.txt
+sdkconfig.lolin_c3_mini
