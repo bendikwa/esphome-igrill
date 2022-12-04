@@ -197,29 +197,42 @@ namespace esphome
     void IGrill::read_propane_(uint8_t *raw_value, uint16_t value_len)
     {
 
-      this->propane_level_sensor_->publish_state(((float)*raw_value*25));
+      this->propane_level_sensor_->publish_state(((float)*raw_value * 25));
     }
 
     void IGrill::read_temperature_(uint8_t *raw_value, uint16_t value_len, int probe)
     {
       uint16_t temp = (raw_value[1] << 8) | raw_value[0];
-      ESP_LOGW(TAG, "Probe = %d", temp);
+      // If the probe reports the "unplugged" value, and send_value_when_unplugged is true, we skip.
+      bool skip = temp == UNPLUGGED_PROBE_VALUE && send_value_when_unplugged_;
       switch (probe)
       {
       case 1:
-        this->temperature_probe1_sensor_->publish_state((float)temp);
+        if (!skip)
+        {
+          this->temperature_probe1_sensor_->publish_state((float)temp);
+        }
         break;
 
       case 2:
-        this->temperature_probe2_sensor_->publish_state((float)temp);
+        if (!skip)
+        {
+          this->temperature_probe2_sensor_->publish_state((float)temp);
+        }
         break;
 
       case 3:
-        this->temperature_probe3_sensor_->publish_state((float)temp);
+        if (!skip)
+        {
+          this->temperature_probe3_sensor_->publish_state((float)temp);
+        }
         break;
 
       case 4:
-        this->temperature_probe4_sensor_->publish_state((float)temp);
+        if (!skip)
+        {
+          this->temperature_probe4_sensor_->publish_state((float)temp);
+        }
         break;
 
       default:
