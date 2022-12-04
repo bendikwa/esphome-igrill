@@ -38,45 +38,20 @@ namespace esphome
 
       case ESP_GATTC_SEARCH_CMPL_EVT:
       {
-        model = IGrill::detect_igrill_model_();
-        switch (model)
-        {
-        case IGRILL_MINI:
-          if (!(this->probe1_handle_ = get_handle_(IGRILL_MINI_TEMPERATURE_SERVICE_UUID, PROBE1_TEMPERATURE)))
-            break;
-          break;
-        case IGRILLV3:
-          if (!(this->probe1_handle_ = get_handle_(IGRILLV3_TEMPERATURE_SERVICE_UUID, PROBE1_TEMPERATURE)))
-            break;
-          
-          if (!(this->probe2_handle_ = get_handle_(IGRILLV3_TEMPERATURE_SERVICE_UUID, PROBE2_TEMPERATURE)))
-            break;
+        // Detect IGrill model and get hadles for the appropriate number of probes.
+        IGrill::detect_and_init_igrill_model_();
 
-          if (!(this->probe3_handle_ = get_handle_(IGRILLV3_TEMPERATURE_SERVICE_UUID, PROBE3_TEMPERATURE)))
-            break;
+        // Get handle for battery level
+        this->battery_level_handle_ = get_handle_(BATTERY_SERVICE_UUID, BATTERY_LEVEL_UUID);
 
-          if (!(this->probe4_handle_ = get_handle_(IGRILLV3_TEMPERATURE_SERVICE_UUID, PROBE4_TEMPERATURE)))
-            break;
-          break;
-
-        default:
-          break;
-        }
-
-        if (!(this->battery_level_handle_ = get_handle_(BATTERY_SERVICE_UUID, BATTERY_LEVEL_UUID)))
-          break;
-
-        if (!(this->app_challenge_handle_ = get_handle_(AUTHENTICATION_SERVICE_UUID, APP_CHALLENGE_UUID)))
-          break;
-
-        if (!(this->device_response_handle_ = get_handle_(AUTHENTICATION_SERVICE_UUID, DEVICE_RESPONSE_UUID)))
-          break;
-
-        if (!(this->device_challenge_handle_ = get_handle_(AUTHENTICATION_SERVICE_UUID, DEVICE_CHALLENGE_UUID)))
-          break;
+        // Get handles for authentication
+        this->app_challenge_handle_ = get_handle_(AUTHENTICATION_SERVICE_UUID, APP_CHALLENGE_UUID);
+        this->device_response_handle_ = get_handle_(AUTHENTICATION_SERVICE_UUID, DEVICE_RESPONSE_UUID);
+        this->device_challenge_handle_ = get_handle_(AUTHENTICATION_SERVICE_UUID, DEVICE_CHALLENGE_UUID);
 
         ESP_LOGD(TAG, "Starting autheintication process");
         send_authentication_challenge_();
+
         this->node_state = esp32_ble_tracker::ClientState::ESTABLISHED;
         break;
       }
@@ -120,7 +95,22 @@ namespace esphome
         }
         else if (param->read.handle == this->probe1_handle_)
         {
-          read_temperature_(param->read.value, param->read.value_len);
+          read_temperature_(param->read.value, param->read.value_len ,1);
+          break;
+        }
+        else if (param->read.handle == this->probe2_handle_)
+        {
+          read_temperature_(param->read.value, param->read.value_len ,2);
+          break;
+        }
+        else if (param->read.handle == this->probe3_handle_)
+        {
+          read_temperature_(param->read.value, param->read.value_len ,3);
+          break;
+        }
+        else if (param->read.handle == this->probe4_handle_)
+        {
+          read_temperature_(param->read.value, param->read.value_len ,4);
           break;
         }
         else if (param->read.handle == this->device_challenge_handle_)
@@ -136,21 +126,23 @@ namespace esphome
       }
     }
 
-    IGrillModel IGrill::detect_igrill_model_()
+    void IGrill::detect_and_init_igrill_model_()
     {
       if (has_service_(IGRILL_MINI_TEMPERATURE_SERVICE_UUID))
       {
         ESP_LOGW(TAG, "Detected model: IGrill mini");
-        if (IGrill::has_propane_level_()){
-          ESP_LOGW(TAG, "Has propane sensor");
-        } else {
-          ESP_LOGW(TAG, "Does not have propane sensor");
-        }
-        return IGRILL_MINI;
+        num_probes = 1;
+        IGrill::get_temperature_probe_handles_(IGRILL_MINI_TEMPERATURE_SERVICE_UUID);
+      }
+      else if (has_service_(IGRILLV3_TEMPERATURE_SERVICE_UUID))
+      {
+        ESP_LOGW(TAG, "Detected model: IGrill V3");
+        num_probes = 4;
+        IGrill::get_temperature_probe_handles_(IGRILLV3_TEMPERATURE_SERVICE_UUID);
       }
       else
       {
-        return UNKNOWN;
+        ESP_LOGE(TAG, "Could not identify IGrill model");
       }
     }
 
@@ -163,6 +155,15 @@ namespace esphome
         return false;
       }
       return true;
+    }
+
+    void IGrill::get_temperature_probe_handles_(const char *service)
+    {
+      std::vector<const char *> probes = {PROBE1_TEMPERATURE, PROBE2_TEMPERATURE, PROBE3_TEMPERATURE, PROBE4_TEMPERATURE};
+      for (int i = 0; i < this->num_probes; i++)
+      {
+        *this->handles[i] = get_handle_(service, probes[i]);
+      }
     }
 
     uint16_t IGrill::get_handle_(const char *service, const char *characteristic)
@@ -182,12 +183,34 @@ namespace esphome
       this->battery_level_sensor_->publish_state((float)*raw_value);
     }
 
-    void IGrill::read_temperature_(uint8_t *raw_value, uint16_t value_len)
+    void IGrill::read_temperature_(uint8_t *raw_value, uint16_t value_len, int probe)
     {
       uint16_t temp = (raw_value[1] << 8) | raw_value[0];
-      this->temperature_sensor_->publish_state((float)temp);
+      switch (probe)
+      {
+      case 1:
+        this->temperature_probe1_sensor_->publish_state((float)temp);
+        break;
+      
+      case 2:
+        this->temperature_probe2_sensor_->publish_state((float)temp);
+        break;
+      
+      case 3:
+        this->temperature_probe3_sensor_->publish_state((float)temp);
+        break;
+      
+      case 4:
+        this->temperature_probe4_sensor_->publish_state((float)temp);
+        break;
+      
+      default:
+        break;
+      }
+      
     }
 
+    // TODO Hande update()
     void IGrill::update()
     {
       if (this->node_state != esp32_ble_tracker::ClientState::ESTABLISHED)
@@ -247,17 +270,22 @@ namespace esphome
       {
         ESP_LOGW(TAG, "Error sending read request for sensor, status=%d", status);
       }
-
-      status = esp_ble_gattc_read_char(this->parent()->get_gattc_if(), this->parent()->get_conn_id(), this->probe1_handle_, ESP_GATT_AUTH_REQ_NONE);
-      if (status)
+      for (int i = 0; i < this->num_probes; i++)
       {
-        ESP_LOGW(TAG, "Error sending read request for sensor, status=%d", status);
+        status = esp_ble_gattc_read_char(this->parent()->get_gattc_if(), this->parent()->get_conn_id(), *this->handles[i], ESP_GATT_AUTH_REQ_NONE);
+        if (status)
+        {
+          ESP_LOGW(TAG, "Error sending read request for sensor, status=%d", status);
+        }
       }
     }
 
     void IGrill::dump_config()
     {
-      LOG_SENSOR("  ", "Temperature", this->temperature_sensor_);
+      LOG_SENSOR("  ", "Temperature", this->temperature_probe1_sensor_);
+      LOG_SENSOR("  ", "Temperature", this->temperature_probe2_sensor_);
+      LOG_SENSOR("  ", "Temperature", this->temperature_probe3_sensor_);
+      LOG_SENSOR("  ", "Temperature", this->temperature_probe4_sensor_);
       LOG_SENSOR("  ", "Battery Level", this->battery_level_sensor_);
     }
 

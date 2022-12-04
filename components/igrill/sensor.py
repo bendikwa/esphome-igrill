@@ -22,6 +22,10 @@ IGrill = igrill_ns.class_(
 )
 
 CONF_HAS_PROPANE_LEVEL = "has_propane_level"
+CONF_TEMPERATURE_PROBE1 = "temperature_probe1"
+CONF_TEMPERATURE_PROBE2 = "temperature_probe2"
+CONF_TEMPERATURE_PROBE3 = "temperature_probe3"
+CONF_TEMPERATURE_PROBE4 = "temperature_probe4"
 
 CONFIG_SCHEMA = cv.All(
     cv.Schema(
@@ -34,7 +38,25 @@ CONFIG_SCHEMA = cv.All(
                 state_class=STATE_CLASS_MEASUREMENT,
                 entity_category=ENTITY_CATEGORY_DIAGNOSTIC,
             ),
-            cv.Optional(CONF_TEMPERATURE): sensor.sensor_schema(
+            cv.Optional(CONF_TEMPERATURE_PROBE1): sensor.sensor_schema(
+                unit_of_measurement=UNIT_CELSIUS,
+                accuracy_decimals=2,
+                device_class=DEVICE_CLASS_TEMPERATURE,
+                state_class=STATE_CLASS_MEASUREMENT,
+            ),
+            cv.Optional(CONF_TEMPERATURE_PROBE2): sensor.sensor_schema(
+                unit_of_measurement=UNIT_CELSIUS,
+                accuracy_decimals=2,
+                device_class=DEVICE_CLASS_TEMPERATURE,
+                state_class=STATE_CLASS_MEASUREMENT,
+            ),
+            cv.Optional(CONF_TEMPERATURE_PROBE3): sensor.sensor_schema(
+                unit_of_measurement=UNIT_CELSIUS,
+                accuracy_decimals=2,
+                device_class=DEVICE_CLASS_TEMPERATURE,
+                state_class=STATE_CLASS_MEASUREMENT,
+            ),
+            cv.Optional(CONF_TEMPERATURE_PROBE4): sensor.sensor_schema(
                 unit_of_measurement=UNIT_CELSIUS,
                 accuracy_decimals=2,
                 device_class=DEVICE_CLASS_TEMPERATURE,
@@ -57,7 +79,16 @@ async def to_code(config):
     if CONF_BATTERY_LEVEL in config:
         sens = await sensor.new_sensor(config[CONF_BATTERY_LEVEL])
         cg.add(var.set_battery(sens))
-    if CONF_TEMPERATURE in config:
+    if CONF_TEMPERATURE_PROBE1 in config:
+        sens = await sensor.new_sensor(config[CONF_TEMPERATURE])
+        cg.add(var.set_temperature(sens))
+    if CONF_TEMPERATURE_PROBE2 in config:
+        sens = await sensor.new_sensor(config[CONF_TEMPERATURE])
+        cg.add(var.set_temperature(sens))
+    if CONF_TEMPERATURE_PROBE3 in config:
+        sens = await sensor.new_sensor(config[CONF_TEMPERATURE])
+        cg.add(var.set_temperature(sens))
+    if CONF_TEMPERATURE_PROBE4 in config:
         sens = await sensor.new_sensor(config[CONF_TEMPERATURE])
         cg.add(var.set_temperature(sens))
     cg.add(var.set_has_propane_level(config[CONF_HAS_PROPANE_LEVEL]))
