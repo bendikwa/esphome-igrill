@@ -203,41 +203,62 @@ namespace esphome
     void IGrill::read_temperature_(uint8_t *raw_value, uint16_t value_len, int probe)
     {
       uint16_t temp = (raw_value[1] << 8) | raw_value[0];
-      // If the probe reports the "unplugged" value, and send_value_when_unplugged is true, we skip.
-      bool skip = temp == UNPLUGGED_PROBE_VALUE && !send_value_when_unplugged_;
-
-      if (skip)
-      {
-        ESP_LOGW(TAG, "we should skip");
-      }
-
+      bool probe_unplugged = temp == UNPLUGGED_PROBE_CONSTANT;
       switch (probe)
       {
       case 1:
-        if (!skip)
+        if (probe_unplugged)
+        {
+          if (send_value_when_unplugged_)
+          {
+            this->temperature_probe1_sensor_->publish_state(this->unplugged_probe_value);
+          }
+        }
+        else
         {
           this->temperature_probe1_sensor_->publish_state((float)temp);
         }
         break;
 
       case 2:
-        if (!skip)
+        if (probe_unplugged)
         {
-          this->temperature_probe2_sensor_->publish_state((float)temp);
+          if (send_value_when_unplugged_)
+          {
+            this->temperature_probe1_sensor_->publish_state(this->unplugged_probe_value);
+          }
+        }
+        else
+        {
+          this->temperature_probe1_sensor_->publish_state((float)temp);
         }
         break;
 
       case 3:
-        if (!skip)
+        if (probe_unplugged)
         {
-          this->temperature_probe3_sensor_->publish_state((float)temp);
+          if (send_value_when_unplugged_)
+          {
+            this->temperature_probe1_sensor_->publish_state(this->unplugged_probe_value);
+          }
+        }
+        else
+        {
+          this->temperature_probe1_sensor_->publish_state((float)temp);
         }
         break;
 
       case 4:
-        if (!skip)
+        if (probe_unplugged)
         {
-          this->temperature_probe4_sensor_->publish_state((float)temp);
+          if (send_value_when_unplugged_)
+          {
+            this->temperature_probe1_sensor_->publish_state(this->unplugged_probe_value);
+          }
+        }
+        else
+        {
+          this->temperature_probe1_sensor_->publish_state((float)temp);
         }
         break;
 
