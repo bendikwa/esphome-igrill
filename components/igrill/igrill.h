@@ -52,25 +52,22 @@ namespace esphome
       void set_temperature_probe2(sensor::Sensor *temperature) { temperature_probe2_sensor_ = temperature; }
       void set_temperature_probe3(sensor::Sensor *temperature) { temperature_probe3_sensor_ = temperature; }
       void set_temperature_probe4(sensor::Sensor *temperature) { temperature_probe4_sensor_ = temperature; }
+      void set_propane(sensor::Sensor *propane) { propane_level_sensor_ = propane; }
       void set_battery(sensor::Sensor *battery) { battery_level_sensor_ = battery; }
-      void set_has_propane_level(bool has_propane_level) { propane_level_ = has_propane_level; }
 
     protected:
       void detect_and_init_igrill_model_();
-      bool has_propane_level_() { return propane_level_; }
-      bool has_heating_element_() { return heating_element_; }
       bool has_service_(const char *service);
       void get_temperature_probe_handles_(const char *service);
       uint16_t get_handle_(const char *service, const char *chr);
       void read_battery_(uint8_t *value, uint16_t value_len);
+      void read_propane_(uint8_t *value, uint16_t value_len);
       void read_temperature_(uint8_t *value, uint16_t value_len, int probe);
       void request_read_values_();
       void request_device_challenge_read_();
       void send_authentication_challenge_();
       void loopback_device_challenge_response_(uint8_t *raw_value, uint16_t value_len);
 
-      bool propane_level_;
-      bool heating_element_;
       int num_probes = 0;
 
       sensor::Sensor *temperature_probe1_sensor_{nullptr};
@@ -78,6 +75,7 @@ namespace esphome
       sensor::Sensor *temperature_probe3_sensor_{nullptr};
       sensor::Sensor *temperature_probe4_sensor_{nullptr};
       sensor::Sensor *battery_level_sensor_{nullptr};
+      sensor::Sensor *propane_level_sensor_{nullptr};
 
       uint16_t app_challenge_handle_;
       uint16_t device_challenge_handle_;
@@ -86,6 +84,7 @@ namespace esphome
       uint16_t probe2_handle_;
       uint16_t probe3_handle_;
       uint16_t probe4_handle_;
+      uint16_t propane_level_handle_;
       std::vector<uint16_t *> handles = {&probe1_handle_, &probe2_handle_, &probe3_handle_, &probe4_handle_};
       uint16_t battery_level_handle_;
     };

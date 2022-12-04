@@ -4,10 +4,10 @@ from esphome.components import sensor, ble_client
 
 from esphome.const import (
     CONF_BATTERY_LEVEL,
-    CONF_TEMPERATURE,
     CONF_ID,
     DEVICE_CLASS_BATTERY,
     DEVICE_CLASS_TEMPERATURE,
+    DEVICE_CLASS_GAS,
     ENTITY_CATEGORY_DIAGNOSTIC,
     STATE_CLASS_MEASUREMENT,
     UNIT_PERCENT,
@@ -21,7 +21,7 @@ IGrill = igrill_ns.class_(
     "IGrill", cg.PollingComponent, ble_client.BLEClientNode
 )
 
-CONF_HAS_PROPANE_LEVEL = "has_propane_level"
+CONF_PROPANE_LEVEL = "propane_level"
 CONF_TEMPERATURE_PROBE1 = "temperature_probe1"
 CONF_TEMPERATURE_PROBE2 = "temperature_probe2"
 CONF_TEMPERATURE_PROBE3 = "temperature_probe3"
@@ -62,7 +62,13 @@ CONFIG_SCHEMA = cv.All(
                 device_class=DEVICE_CLASS_TEMPERATURE,
                 state_class=STATE_CLASS_MEASUREMENT,
             ),
-            cv.Optional(CONF_HAS_PROPANE_LEVEL, default=False): cv.boolean,
+            cv.Optional(CONF_PROPANE_LEVEL): sensor.sensor_schema(
+                unit_of_measurement=UNIT_PERCENT,
+                accuracy_decimals=0,
+                device_class=DEVICE_CLASS_GAS,
+                state_class=STATE_CLASS_MEASUREMENT,
+                entity_category=ENTITY_CATEGORY_DIAGNOSTIC,
+            ),
         }
     )
     .extend(cv.polling_component_schema("5min"))
@@ -91,4 +97,6 @@ async def to_code(config):
     if CONF_TEMPERATURE_PROBE4 in config:
         sens = await sensor.new_sensor(config[CONF_TEMPERATURE_PROBE4])
         cg.add(var.set_temperature_probe4(sens))
-    cg.add(var.set_has_propane_level(config[CONF_HAS_PROPANE_LEVEL]))
+    if CONF_PROPANE_LEVEL in config:
+        sens = await sensor.new_sensor(config[CONF_PROPANE_LEVEL])
+        cg.add(var.set_propane(sens))

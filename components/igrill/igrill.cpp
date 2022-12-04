@@ -44,6 +44,12 @@ namespace esphome
         // Get handle for battery level
         this->battery_level_handle_ = get_handle_(BATTERY_SERVICE_UUID, BATTERY_LEVEL_UUID);
 
+        // Get handle for propane level, if configured
+        if (this->propane_level_sensor_ != nullptr)
+        {
+          this->propane_level_handle_ = get_handle_(PROPANE_LEVEL_SERVICE_UUID, PROPANE_LEVEL);
+        }
+
         // Get handles for authentication
         this->app_challenge_handle_ = get_handle_(AUTHENTICATION_SERVICE_UUID, APP_CHALLENGE_UUID);
         this->device_response_handle_ = get_handle_(AUTHENTICATION_SERVICE_UUID, DEVICE_RESPONSE_UUID);
@@ -93,24 +99,29 @@ namespace esphome
           read_battery_(param->read.value, param->read.value_len);
           break;
         }
+        else if (param->read.handle == this->propane_level_handle_)
+        {
+          read_propane_(param->read.value, param->read.value_len);
+          break;
+        }
         else if (param->read.handle == this->probe1_handle_)
         {
-          read_temperature_(param->read.value, param->read.value_len ,1);
+          read_temperature_(param->read.value, param->read.value_len, 1);
           break;
         }
         else if (param->read.handle == this->probe2_handle_)
         {
-          read_temperature_(param->read.value, param->read.value_len ,2);
+          read_temperature_(param->read.value, param->read.value_len, 2);
           break;
         }
         else if (param->read.handle == this->probe3_handle_)
         {
-          read_temperature_(param->read.value, param->read.value_len ,3);
+          read_temperature_(param->read.value, param->read.value_len, 3);
           break;
         }
         else if (param->read.handle == this->probe4_handle_)
         {
-          read_temperature_(param->read.value, param->read.value_len ,4);
+          read_temperature_(param->read.value, param->read.value_len, 4);
           break;
         }
         else if (param->read.handle == this->device_challenge_handle_)
@@ -183,6 +194,12 @@ namespace esphome
       this->battery_level_sensor_->publish_state((float)*raw_value);
     }
 
+    void IGrill::read_propane_(uint8_t *raw_value, uint16_t value_len)
+    {
+
+      this->propane_level_sensor_->publish_state(((float)*raw_value*25));
+    }
+
     void IGrill::read_temperature_(uint8_t *raw_value, uint16_t value_len, int probe)
     {
       uint16_t temp = (raw_value[1] << 8) | raw_value[0];
@@ -191,23 +208,22 @@ namespace esphome
       case 1:
         this->temperature_probe1_sensor_->publish_state((float)temp);
         break;
-      
+
       case 2:
         this->temperature_probe2_sensor_->publish_state((float)temp);
         break;
-      
+
       case 3:
         this->temperature_probe3_sensor_->publish_state((float)temp);
         break;
-      
+
       case 4:
         this->temperature_probe4_sensor_->publish_state((float)temp);
         break;
-      
+
       default:
         break;
       }
-      
     }
 
     // TODO Hande update()
@@ -265,14 +281,27 @@ namespace esphome
 
     void IGrill::request_read_values_()
     {
+      // Read battery level
       auto status = esp_ble_gattc_read_char(this->parent()->get_gattc_if(), this->parent()->get_conn_id(), this->battery_level_handle_, ESP_GATT_AUTH_REQ_NONE);
       if (status)
       {
         ESP_LOGW(TAG, "Error sending read request for sensor, status=%d", status);
       }
+
+      // Read temperature probes
       for (int i = 0; i < this->num_probes; i++)
       {
         status = esp_ble_gattc_read_char(this->parent()->get_gattc_if(), this->parent()->get_conn_id(), *this->handles[i], ESP_GATT_AUTH_REQ_NONE);
+        if (status)
+        {
+          ESP_LOGW(TAG, "Error sending read request for sensor, status=%d", status);
+        }
+      }
+
+      // Read propane level
+      if (this->propane_level_handle_)
+      {
+        status = esp_ble_gattc_read_char(this->parent()->get_gattc_if(), this->parent()->get_conn_id(), this->propane_level_handle_, ESP_GATT_AUTH_REQ_NONE);
         if (status)
         {
           ESP_LOGW(TAG, "Error sending read request for sensor, status=%d", status);
@@ -287,6 +316,7 @@ namespace esphome
       LOG_SENSOR("  ", "Temperature", this->temperature_probe3_sensor_);
       LOG_SENSOR("  ", "Temperature", this->temperature_probe4_sensor_);
       LOG_SENSOR("  ", "Battery Level", this->battery_level_sensor_);
+      LOG_SENSOR("  ", "Propane Level", this->propane_level_sensor_);
     }
 
     IGrill::IGrill()
