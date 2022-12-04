@@ -204,7 +204,20 @@ namespace esphome
     {
       uint16_t temp = (raw_value[1] << 8) | raw_value[0];
       // If the probe reports the "unplugged" value, and send_value_when_unplugged is true, we skip.
-      bool skip = temp == UNPLUGGED_PROBE_VALUE && send_value_when_unplugged_;
+
+      bool unplugged = temp == UNPLUGGED_PROBE_VALUE;
+      if (unplugged)
+      {
+        ESP_LOGW(TAG, "Probe is unplugged");
+      }
+
+      bool skip = unplugged && send_value_when_unplugged_;
+
+      if (skip)
+      {
+        ESP_LOGW(TAG, "we should skip");
+      }
+
       switch (probe)
       {
       case 1:
