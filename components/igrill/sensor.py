@@ -81,14 +81,14 @@ async def to_code(config):
         cg.add(var.set_battery(sens))
     if CONF_TEMPERATURE_PROBE1 in config:
         sens = await sensor.new_sensor(config[CONF_TEMPERATURE_PROBE1])
-        cg.add(var.set_temperature(sens))
+        cg.add(var.set_temperature_probe1(sens))
     if CONF_TEMPERATURE_PROBE2 in config:
         sens = await sensor.new_sensor(config[CONF_TEMPERATURE_PROBE2])
-        cg.add(var.set_temperature(sens))
+        cg.add(var.set_temperature_probe2(sens))
     if CONF_TEMPERATURE_PROBE3 in config:
         sens = await sensor.new_sensor(config[CONF_TEMPERATURE_PROBE3])
-        cg.add(var.set_temperature(sens))
+        cg.add(var.set_temperature_probe3(sens))
     if CONF_TEMPERATURE_PROBE4 in config:
         sens = await sensor.new_sensor(config[CONF_TEMPERATURE_PROBE4])
-        cg.add(var.set_temperature(sens))
+        cg.add(var.set_temperature_probe4(sens))
     cg.add(var.set_has_propane_level(config[CONF_HAS_PROPANE_LEVEL]))
