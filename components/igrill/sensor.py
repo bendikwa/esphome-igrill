@@ -20,7 +20,7 @@ igrill_ns = cg.esphome_ns.namespace("igrill")
 IGrill = igrill_ns.class_(
     "IGrill", cg.PollingComponent, ble_client.BLEClientNode
 )
-
+CONF_SEND_VALUE_WHEN_UNPLUGGED = "send_value_when_unplugged"
 CONF_PROPANE_LEVEL = "propane_level"
 CONF_TEMPERATURE_PROBE1 = "temperature_probe1"
 CONF_TEMPERATURE_PROBE2 = "temperature_probe2"
@@ -69,6 +69,7 @@ CONFIG_SCHEMA = cv.All(
                 state_class=STATE_CLASS_MEASUREMENT,
                 entity_category=ENTITY_CATEGORY_DIAGNOSTIC,
             ),
+            cv.Optional(CONF_SEND_VALUE_WHEN_UNPLUGGED, default=False): cv.boolean,
         }
     )
     .extend(cv.polling_component_schema("5min"))
@@ -100,3 +101,4 @@ async def to_code(config):
     if CONF_PROPANE_LEVEL in config:
         sens = await sensor.new_sensor(config[CONF_PROPANE_LEVEL])
         cg.add(var.set_propane(sens))
+    cg.add(var.set_send_value_when_unplugged(config[CONF_SEND_VALUE_WHEN_UNPLUGGED]))

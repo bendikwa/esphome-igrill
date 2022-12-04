@@ -39,6 +39,8 @@ namespace esphome
     static const char *const BATTERY_SERVICE_UUID = "180F";
     static const char *const BATTERY_LEVEL_UUID = "2A19";
 
+    static const uint16_t UNPLUGGED_PROBE_VALUE = 63536;
+
     class IGrill : public PollingComponent, public ble_client::BLEClientNode
     {
     public:
@@ -54,6 +56,7 @@ namespace esphome
       void set_temperature_probe4(sensor::Sensor *temperature) { temperature_probe4_sensor_ = temperature; }
       void set_propane(sensor::Sensor *propane) { propane_level_sensor_ = propane; }
       void set_battery(sensor::Sensor *battery) { battery_level_sensor_ = battery; }
+      void set_send_value_when_unplugged(bool send_value_when_unplugged) { send_value_when_unplugged_ = send_value_when_unplugged; }
 
     protected:
       void detect_and_init_igrill_model_();
@@ -69,6 +72,7 @@ namespace esphome
       void loopback_device_challenge_response_(uint8_t *raw_value, uint16_t value_len);
 
       int num_probes = 0;
+      bool send_value_when_unplugged_;
 
       sensor::Sensor *temperature_probe1_sensor_{nullptr};
       sensor::Sensor *temperature_probe2_sensor_{nullptr};
