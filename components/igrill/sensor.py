@@ -71,7 +71,7 @@ CONFIG_SCHEMA = cv.All(
                 entity_category=ENTITY_CATEGORY_DIAGNOSTIC,
             ),
             cv.Optional(CONF_SEND_VALUE_WHEN_UNPLUGGED, default=True): cv.boolean,
-            cv.Optional(CONF_UNPLUGGED_PROBE_VALUE, default=0): cv.float,
+            cv.Optional(CONF_UNPLUGGED_PROBE_VALUE, default=0): cv.float_,
         }
     )
     .extend(cv.polling_component_schema("5min"))
