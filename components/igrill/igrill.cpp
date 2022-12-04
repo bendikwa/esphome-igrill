@@ -130,13 +130,13 @@ namespace esphome
     {
       if (has_service_(IGRILL_MINI_TEMPERATURE_SERVICE_UUID))
       {
-        ESP_LOGW(TAG, "Detected model: IGrill mini");
+        ESP_LOGI(TAG, "Detected model: IGrill mini");
         num_probes = 1;
         IGrill::get_temperature_probe_handles_(IGRILL_MINI_TEMPERATURE_SERVICE_UUID);
       }
       else if (has_service_(IGRILLV3_TEMPERATURE_SERVICE_UUID))
       {
-        ESP_LOGW(TAG, "Detected model: IGrill V3");
+        ESP_LOGI(TAG, "Detected model: IGrill V3");
         num_probes = 4;
         IGrill::get_temperature_probe_handles_(IGRILLV3_TEMPERATURE_SERVICE_UUID);
       }
@@ -151,7 +151,7 @@ namespace esphome
       auto *srv = this->parent()->get_service(esp32_ble_tracker::ESPBTUUID::from_raw(service));
       if (srv == nullptr)
       {
-        ESP_LOGW(TAG, "No service found at service %s", service);
+        ESP_LOGD(TAG, "No service found at service %s", service);
         return false;
       }
       return true;
