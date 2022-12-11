@@ -145,6 +145,24 @@ namespace esphome
         num_probes = 1;
         IGrill::get_temperature_probe_handles_(IGRILL_MINI_TEMPERATURE_SERVICE_UUID);
       }
+      else if (has_service_(IGRILL_MINIV2_TEMPERATURE_SERVICE_UUID))
+      {
+        ESP_LOGI(TAG, "Detected model: IGrill mini V2");
+        num_probes = 1;
+        IGrill::get_temperature_probe_handles_(IGRILL_MINIV2_TEMPERATURE_SERVICE_UUID);
+      }
+      else if (has_service_(IGRILLV2_TEMPERATURE_SERVICE_UUID))
+      {
+        ESP_LOGI(TAG, "Detected model: IGrill V2");
+        num_probes = 4;
+        IGrill::get_temperature_probe_handles_(IGRILLV2_TEMPERATURE_SERVICE_UUID);
+      }
+      else if (has_service_(IGRILLV202_TEMPERATURE_SERVICE_UUID))
+      {
+        ESP_LOGI(TAG, "Detected model: IGrill V202");
+        num_probes = 4;
+        IGrill::get_temperature_probe_handles_(IGRILLV202_TEMPERATURE_SERVICE_UUID);
+      }
       else if (has_service_(IGRILLV3_TEMPERATURE_SERVICE_UUID))
       {
         ESP_LOGI(TAG, "Detected model: IGrill V3");
@@ -250,23 +268,16 @@ namespace esphome
     // TODO Hande update()
     void IGrill::update()
     {
-      if (this->node_state != esp32_ble_tracker::ClientState::ESTABLISHED)
+      switch (this->node_state)
       {
-        if (!parent()->enabled)
-        {
-          ESP_LOGW(TAG, "Reconnecting to device");
-          parent()->set_enabled(true);
-          parent()->connect();
-        }
-        else
-        {
-          ESP_LOGW(TAG, "Connection in progress");
-        }
-      }
-      else
-      {
+      case esp32_ble_tracker::ClientState::ESTABLISHED:
         ESP_LOGD(TAG, "Requesting read of all probe values");
         request_read_values_();
+        break;
+
+      default:
+        ESP_LOGD(TAG, "No IGrill device connected");
+        break;
       }
     }
 
