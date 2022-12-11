@@ -74,7 +74,7 @@ CONFIG_SCHEMA = cv.All(
             cv.Optional(CONF_UNPLUGGED_PROBE_VALUE, default=0): cv.float_,
         }
     )
-    .extend(cv.polling_component_schema("5min"))
+    .extend(cv.polling_component_schema("30s"))
     .extend(ble_client.BLE_CLIENT_SCHEMA),
 )
 

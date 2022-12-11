@@ -263,6 +263,11 @@ namespace esphome
           ESP_LOGW(TAG, "Connection in progress");
         }
       }
+      else
+      {
+        ESP_LOGD(TAG, "Requesting read of all probe values");
+        request_read_values_();
+      }
     }
 
     void IGrill::send_authentication_challenge_()
