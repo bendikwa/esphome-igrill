@@ -32,7 +32,7 @@ The device will then listen for nearby devices, and display a message like this 
 Once the device is found, remove the igrill_ble_listener device tracker from your configuration and take note of the device MAC address, and use it when configuring a sensor below.
 
 ## Supported Devices
-In principle, all IGrill devices, including the Pulse2000 is supported, but I do not own all of them, so this is the list of confirmed working IGrill models:
+In principle, all IGrill devices, including the Pulse2000 is supported, but I do not own all of them. The ones with a checkmark in the list are confirmed working IGrill models:
 
 - [x] IGrill mini
 - [ ] IGrill mini V2
