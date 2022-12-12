@@ -1,7 +1,7 @@
 # esphome-igrill
 
 ESPHome Custom Component for the iGrill Bluetooth Thermometers
-This component will let you use a supported ESP32 to read sensor values from IGrill bluetooth thermometers
+This component will let you use a supported ESP32 to read sensor values from IGrill bluetooth thermometers.
 
 ## Installation
 
@@ -67,6 +67,11 @@ sensor:
     temperature_probe4:
       name: "IGill v3 temp 4"
 ```
+## Configuration variables
+- **update_interval** (*Optional,* [Time](https://esphome.io/guides/configuration-types.html#config-time)) The interval between each read and publish of sensor values. Defaults to "30s"
+- **send_value_when_unplugged** (*Optional,* boolean): When set to `false`, the component will skip publishing for probes that are unplugged. Defaults to `true`
+- **unplugged_probe_value** (*Optional,* integer): The value to publish when a probe is disconnected, and **send_value_when_unplugged** is `true`. Defaults to 0
+
 
 ## Troubleshooting
 
