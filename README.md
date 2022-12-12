@@ -1,5 +1,93 @@
-# Disclaimer
-This is a work in progress, and is not currently expected to work
-
 # esphome-igrill
+
 ESPHome Custom Component for the iGrill Bluetooth Thermometers
+This component will let you use a supported ESP32 to read sensor values from IGrill bluetooth thermometers
+
+## Installation
+
+To use this component, include it as an [External component](https://esphome.io/components/external_components.html)
+
+```yaml
+external_components:
+  - source: github://bendikwa/esphome-igrill@v1.0
+```
+
+## Device discovery
+
+IGrill devices can be found using the `igrill_ble_listener`
+
+To find out your device’s MAC address, add the following to your ESPHome configuration:
+
+```yaml
+esp32_ble_tracker:
+igrill_ble_listener:
+```
+
+The device will then listen for nearby devices, and display a message like this one:
+
+```
+[I][igrill_ble_listener:029]: Found IGrill device Name: iGrill_mini (MAC: 70:91:8F:XX:XX:XX)
+```
+
+Once the device is found, remove the igrill_ble_listener device tracker from your configuration and take note of the device MAC address, and use it when configuring a sensor below.
+
+## Supported Devices
+In principle, all IGrill devices, including the Pulse2000 is supported, but I do not own all of them, so this is the list of confirmed working IGrill models:
+
+- [x] IGrill mini
+- [ ] IGrill mini V2
+- [ ] Igrill V2
+- [ ] Igrill V202
+- [x] Igrill V3
+- [ ] Weber Pulse2000
+
+If you own one of the untested models, I would be thankfull if you create a ticket so we can get it confirmed working.
+
+## Configuration example
+
+```yaml
+esp32_ble_tracker:
+
+ble_client:
+  - mac_address: 70:91:8F:XX:XX:XX
+    id: igrillv3
+
+sensor:
+  - platform: igrill
+    ble_client_id: igrillv3
+    update_interval: 30s # default
+    battery_level:
+      name: "IGill v3 battery"
+    temperature_probe1:
+      name: "IGill v3 temp 1"
+    temperature_probe2:
+      name: "IGill v3 temp 2"
+    temperature_probe3:
+      name: "IGill v3 temp 3"
+    temperature_probe4:
+      name: "IGill v3 temp 4"
+```
+
+## Troubleshooting
+
+If the ESPHome device can't connect to your IGrill, please make sure that you disconnect it from any other devices you have used in the past. IGrill devices can't maintain multiple connections.
+
+The same goes the other way around. If you use this component to connect to your IGrill, you can not use the mobile app at the same time.
+
+## Disclaimer
+This is a work in progress, and there is a number of things that does not work yet.
+
+What works:
+- MAC address discovery with `igrill_ble_listener`
+- Connection and authorization
+- Detection of model and number of probes
+- Publishing of probe temperatures
+- Publishing of battery level
+- Publishing of propane level (Untested)
+
+TODO:
+- Use correct temperature unit (read from device)
+- Correctly parse and publish Pulse 2000 heating element probes
+- Publish firmware version
+- Read and write temperature setpoint on probes
+- Set temperature unit (write to device)
