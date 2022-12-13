@@ -36,7 +36,7 @@ In principle, all IGrill devices, including the Pulse2000 is supported, but I do
 
 - [x] IGrill mini
 - [ ] IGrill mini V2
-- [ ] Igrill V2
+- [x] Igrill V2 - Thanks to [stogs](https://github.com/stogs) for verifying
 - [ ] Igrill V202
 - [x] Igrill V3
 - [ ] Weber Pulse2000
@@ -72,6 +72,14 @@ sensor:
 - **send_value_when_unplugged** (*Optional,* boolean): When set to `false`, the component will skip publishing for probes that are unplugged. Defaults to `true`
 - **unplugged_probe_value** (*Optional,* integer): The value to publish when a probe is disconnected, and **send_value_when_unplugged** is `true`. Defaults to 0
 
+## Temperature unit:
+For now, the component can not detect the correct temperature unit automatically. The default is Celcius, if your IGrill reports it in Fahrenheit, you need add configuration for it on all probes like this:
+
+```yaml
+    temperature_probeX:
+      name: "IGrill probe X"
+      unit_of_measurement: "°F"
+```
 
 ## Troubleshooting
 
