@@ -40,11 +40,15 @@ sensor:
       name: "IGrill v3 battery"
     temperature_probe1:
       name: "IGrill v3 temp 1"
+      unit_of_measurement: "°C" # default
     temperature_probe2:
       name: "IGrill v3 temp 2"
+      unit_of_measurement: "°C" # default
     temperature_probe3:
       name: "IGrill v3 temp 3"
+      unit_of_measurement: "°C" # default
     temperature_probe4:
       name: "IGrill v3 temp 4"
+      unit_of_measurement: "°C" # default
     propane_level:
       name: "IGrill v3 Propane"
