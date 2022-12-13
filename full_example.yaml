@@ -37,14 +37,14 @@ sensor:
     send_value_when_unplugged: true # default
     unplugged_probe_value: 0 # default
     battery_level:
-      name: "IGill v3 battery"
+      name: "IGrill v3 battery"
     temperature_probe1:
-      name: "IGill v3 temp 1"
+      name: "IGrill v3 temp 1"
     temperature_probe2:
-      name: "IGill v3 temp 2"
+      name: "IGrill v3 temp 2"
     temperature_probe3:
-      name: "IGill v3 temp 3"
+      name: "IGrill v3 temp 3"
     temperature_probe4:
-      name: "IGill v3 temp 4"
+      name: "IGrill v3 temp 4"
     propane_level:
       name: "IGrill v3 Propane"
