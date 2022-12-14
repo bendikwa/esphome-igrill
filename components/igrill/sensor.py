@@ -40,25 +40,21 @@ CONFIG_SCHEMA = cv.All(
                 entity_category=ENTITY_CATEGORY_DIAGNOSTIC,
             ),
             cv.Optional(CONF_TEMPERATURE_PROBE1): sensor.sensor_schema(
-                unit_of_measurement=UNIT_CELSIUS,
                 accuracy_decimals=2,
                 device_class=DEVICE_CLASS_TEMPERATURE,
                 state_class=STATE_CLASS_MEASUREMENT,
             ),
             cv.Optional(CONF_TEMPERATURE_PROBE2): sensor.sensor_schema(
-                unit_of_measurement=UNIT_CELSIUS,
                 accuracy_decimals=2,
                 device_class=DEVICE_CLASS_TEMPERATURE,
                 state_class=STATE_CLASS_MEASUREMENT,
             ),
             cv.Optional(CONF_TEMPERATURE_PROBE3): sensor.sensor_schema(
-                unit_of_measurement=UNIT_CELSIUS,
                 accuracy_decimals=2,
                 device_class=DEVICE_CLASS_TEMPERATURE,
                 state_class=STATE_CLASS_MEASUREMENT,
             ),
             cv.Optional(CONF_TEMPERATURE_PROBE4): sensor.sensor_schema(
-                unit_of_measurement=UNIT_CELSIUS,
                 accuracy_decimals=2,
                 device_class=DEVICE_CLASS_TEMPERATURE,
                 state_class=STATE_CLASS_MEASUREMENT,

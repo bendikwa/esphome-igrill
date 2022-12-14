@@ -26,6 +26,7 @@ namespace esphome
     static const char *const IGRILLV2_TEMPERATURE_SERVICE_UUID = "A5C50000-F186-4BD6-97F2-7EBACBA0D708";
     static const char *const IGRILLV202_TEMPERATURE_SERVICE_UUID = "ADA7590F-2E6D-469E-8F7B-1822B386A5E9";
     static const char *const IGRILLV3_TEMPERATURE_SERVICE_UUID = "6E910000-58DC-41C7-943F-518B278CEA88";
+    static const char *const TEMPERATURE_UNIT_UUID = "06ef0001-2e06-4b79-9e33-fce2c42805ec";
     static const char *const PROBE1_TEMPERATURE = "06ef0002-2e06-4b79-9e33-fce2c42805ec";
     static const char *const PROBE2_TEMPERATURE = "06ef0004-2e06-4b79-9e33-fce2c42805ec";
     static const char *const PROBE3_TEMPERATURE = "06ef0006-2e06-4b79-9e33-fce2c42805ec";
@@ -40,6 +41,9 @@ namespace esphome
     static const char *const BATTERY_LEVEL_UUID = "2A19";
 
     static const uint16_t UNPLUGGED_PROBE_CONSTANT = 63536;
+    
+    static const char *const FAHRENHEIT_UNIT_STRING = "°F";
+    static const char *const CELCIUS_UNIT_STRING = "°C";
 
     class IGrill : public PollingComponent, public ble_client::BLEClientNode
     {
@@ -57,7 +61,7 @@ namespace esphome
       void set_propane(sensor::Sensor *propane) { propane_level_sensor_ = propane; }
       void set_battery(sensor::Sensor *battery) { battery_level_sensor_ = battery; }
       void set_send_value_when_unplugged(bool send_value_when_unplugged) { send_value_when_unplugged_ = send_value_when_unplugged; }
-      void set_unplugged_probe_value(float unplugged_probe_value) {unplugged_probe_value = unplugged_probe_value; }
+      void set_unplugged_probe_value(float unplugged_probe_value) {unplugged_probe_value_ = unplugged_probe_value; }
 
     protected:
       void detect_and_init_igrill_model_();
@@ -65,16 +69,19 @@ namespace esphome
       void get_temperature_probe_handles_(const char *service);
       uint16_t get_handle_(const char *service, const char *chr);
       void read_battery_(uint8_t *value, uint16_t value_len);
+      void read_temperature_unit_(uint8_t *value, uint16_t value_len);
       void read_propane_(uint8_t *value, uint16_t value_len);
       void read_temperature_(uint8_t *value, uint16_t value_len, int probe);
       void request_read_values_();
+      void request_temp_unit_read_();
       void request_device_challenge_read_();
       void send_authentication_challenge_();
       void loopback_device_challenge_response_(uint8_t *raw_value, uint16_t value_len);
 
       int num_probes = 0;
       bool send_value_when_unplugged_;
-      float unplugged_probe_value;
+      float unplugged_probe_value_;
+      std::string unit_of_measurement_;
 
       sensor::Sensor *temperature_probe1_sensor_{nullptr};
       sensor::Sensor *temperature_probe2_sensor_{nullptr};
@@ -86,6 +93,7 @@ namespace esphome
       uint16_t app_challenge_handle_;
       uint16_t device_challenge_handle_;
       uint16_t device_response_handle_;
+      uint16_t temperature_unit_handle_;
       uint16_t probe1_handle_;
       uint16_t probe2_handle_;
       uint16_t probe3_handle_;
