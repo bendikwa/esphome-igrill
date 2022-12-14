@@ -61,7 +61,7 @@ namespace esphome
       void set_propane(sensor::Sensor *propane) { propane_level_sensor_ = propane; }
       void set_battery(sensor::Sensor *battery) { battery_level_sensor_ = battery; }
       void set_send_value_when_unplugged(bool send_value_when_unplugged) { send_value_when_unplugged_ = send_value_when_unplugged; }
-      void set_unplugged_probe_value(float unplugged_probe_value) {unplugged_probe_value = unplugged_probe_value; }
+      void set_unplugged_probe_value(float unplugged_probe_value) {unplugged_probe_value_ = unplugged_probe_value; }
 
     protected:
       void detect_and_init_igrill_model_();
@@ -80,7 +80,7 @@ namespace esphome
 
       int num_probes = 0;
       bool send_value_when_unplugged_;
-      float unplugged_probe_value;
+      float unplugged_probe_value_;
       std::string unit_of_measurement_;
 
       sensor::Sensor *temperature_probe1_sensor_{nullptr};
