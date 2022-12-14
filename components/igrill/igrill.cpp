@@ -25,7 +25,6 @@ namespace esphome
 
       case ESP_GATTC_CONNECT_EVT:
       {
-        ESP_LOGD(TAG, "this->unplugged_probe_value_: %f", this->unplugged_probe_value_);
         ESP_LOGD(TAG, "Setting encryption");
         esp_ble_set_encryption(param->connect.remote_bda, ESP_BLE_SEC_ENCRYPT);
         break;
@@ -265,13 +264,11 @@ namespace esphome
       bool probe_unplugged = raw_temp == UNPLUGGED_PROBE_CONSTANT;
       bool publish = true;
       float temp = (float)raw_temp;
-      ESP_LOGD(TAG, "this->unplugged_probe_value_: %f", this->unplugged_probe_value_);
       if (probe_unplugged)
       {
         temp = this->unplugged_probe_value_;
         publish = send_value_when_unplugged_;
       }
-      ESP_LOGD(TAG, "Temp after unplugged logic: %f", temp);
       switch (probe)
       {
       case 1:
