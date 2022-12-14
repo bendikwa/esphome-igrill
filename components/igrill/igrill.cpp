@@ -25,6 +25,7 @@ namespace esphome
 
       case ESP_GATTC_CONNECT_EVT:
       {
+        ESP_LOGD(TAG, "this->unplugged_probe_value: %f", this->unplugged_probe_value);
         ESP_LOGD(TAG, "Setting encryption");
         esp_ble_set_encryption(param->connect.remote_bda, ESP_BLE_SEC_ENCRYPT);
         break;
@@ -80,7 +81,7 @@ namespace esphome
         else if (param->write.handle == this->device_response_handle_)
         {
           ESP_LOGD(TAG, "Authentication complete");
-          request_read_values_();
+          request_temp_unit_read_();
           break;
         }
       }
@@ -124,6 +125,11 @@ namespace esphome
           read_temperature_(param->read.value, param->read.value_len, 4);
           break;
         }
+        else if (param->read.handle == this->temperature_unit_handle_)
+        {
+          read_temperature_unit_(param->read.value, param->read.value_len);
+          break;
+        }
         else if (param->read.handle == this->device_challenge_handle_)
         {
           loopback_device_challenge_response_(param->read.value, param->read.value_len);
@@ -139,40 +145,44 @@ namespace esphome
 
     void IGrill::detect_and_init_igrill_model_()
     {
+      const char *service;
       if (has_service_(IGRILL_MINI_TEMPERATURE_SERVICE_UUID))
       {
         ESP_LOGI(TAG, "Detected model: IGrill mini");
         num_probes = 1;
-        IGrill::get_temperature_probe_handles_(IGRILL_MINI_TEMPERATURE_SERVICE_UUID);
+        service = IGRILL_MINI_TEMPERATURE_SERVICE_UUID;
       }
       else if (has_service_(IGRILL_MINIV2_TEMPERATURE_SERVICE_UUID))
       {
         ESP_LOGI(TAG, "Detected model: IGrill mini V2");
         num_probes = 1;
-        IGrill::get_temperature_probe_handles_(IGRILL_MINIV2_TEMPERATURE_SERVICE_UUID);
+        service = IGRILL_MINIV2_TEMPERATURE_SERVICE_UUID;
       }
       else if (has_service_(IGRILLV2_TEMPERATURE_SERVICE_UUID))
       {
         ESP_LOGI(TAG, "Detected model: IGrill V2");
         num_probes = 4;
-        IGrill::get_temperature_probe_handles_(IGRILLV2_TEMPERATURE_SERVICE_UUID);
+        service = IGRILLV2_TEMPERATURE_SERVICE_UUID;
       }
       else if (has_service_(IGRILLV202_TEMPERATURE_SERVICE_UUID))
       {
         ESP_LOGI(TAG, "Detected model: IGrill V202");
         num_probes = 4;
-        IGrill::get_temperature_probe_handles_(IGRILLV202_TEMPERATURE_SERVICE_UUID);
+        service = IGRILLV202_TEMPERATURE_SERVICE_UUID;
       }
       else if (has_service_(IGRILLV3_TEMPERATURE_SERVICE_UUID))
       {
         ESP_LOGI(TAG, "Detected model: IGrill V3");
         num_probes = 4;
-        IGrill::get_temperature_probe_handles_(IGRILLV3_TEMPERATURE_SERVICE_UUID);
+        service = IGRILLV3_TEMPERATURE_SERVICE_UUID;
       }
       else
       {
         ESP_LOGE(TAG, "Could not identify IGrill model");
+        return;
       }
+      IGrill::get_temperature_probe_handles_(service);
+      this->temperature_unit_handle_ = get_handle_(service, TEMPERATURE_UNIT_UUID);
     }
 
     bool IGrill::has_service_(const char *service)
@@ -218,18 +228,50 @@ namespace esphome
       this->propane_level_sensor_->publish_state(((float)*raw_value * 25));
     }
 
+    void IGrill::read_temperature_unit_(uint8_t *raw_value, uint16_t value_len)
+    {
+      if (raw_value[0] == 0)
+      {
+        this->unit_of_measurement_ = FAHRENHEIT_UNIT_STRING;
+      }
+      else
+      {
+        this->unit_of_measurement_ = CELCIUS_UNIT_STRING;
+      }
+      ESP_LOGW(TAG, "Setting temperature unit based on device: %s", this->unit_of_measurement_.c_str());
+
+      if (this->temperature_probe1_sensor_ != nullptr)
+      {
+        temperature_probe1_sensor_->set_unit_of_measurement(this->unit_of_measurement_);
+      }
+      if (this->temperature_probe2_sensor_ != nullptr)
+      {
+        temperature_probe2_sensor_->set_unit_of_measurement(this->unit_of_measurement_);
+      }
+      if (this->temperature_probe3_sensor_ != nullptr)
+      {
+        temperature_probe3_sensor_->set_unit_of_measurement(this->unit_of_measurement_);
+      }
+      if (this->temperature_probe4_sensor_ != nullptr)
+      {
+        temperature_probe4_sensor_->set_unit_of_measurement(this->unit_of_measurement_);
+      }
+      request_read_values_();
+    }
+
     void IGrill::read_temperature_(uint8_t *raw_value, uint16_t value_len, int probe)
     {
       uint16_t raw_temp = (raw_value[1] << 8) | raw_value[0];
       bool probe_unplugged = raw_temp == UNPLUGGED_PROBE_CONSTANT;
       bool publish = true;
-      float temp = (float) raw_temp;
+      float temp = (float)raw_temp;
+      ESP_LOGD(TAG, "this->unplugged_probe_value: %f", this->unplugged_probe_value);
       if (probe_unplugged)
       {
         temp = this->unplugged_probe_value;
         publish = send_value_when_unplugged_;
       }
-
+      ESP_LOGD(TAG, "Temp after unplugged logic: %f", temp);
       switch (probe)
       {
       case 1:
@@ -271,8 +313,16 @@ namespace esphome
       switch (this->node_state)
       {
       case esp32_ble_tracker::ClientState::ESTABLISHED:
-        ESP_LOGD(TAG, "Requesting read of all probe values");
-        request_read_values_();
+        if (this->unit_of_measurement_.empty())
+        {
+          ESP_LOGD(TAG, "Requesting read of temperature unit");
+          request_temp_unit_read_();
+        }
+        else
+        {
+          ESP_LOGD(TAG, "Requesting read of all probe values");
+          request_read_values_();
+        }
         break;
 
       default:
@@ -313,6 +363,15 @@ namespace esphome
       if (status)
       {
         ESP_LOGW(TAG, "Error sending read request for device_challenge, status=%d", status);
+      }
+    }
+
+    void IGrill::request_temp_unit_read_()
+    {
+      auto status = esp_ble_gattc_read_char(this->parent()->get_gattc_if(), this->parent()->get_conn_id(), this->temperature_unit_handle_, ESP_GATT_AUTH_REQ_NONE);
+      if (status)
+      {
+        ESP_LOGW(TAG, "Error sending read request for temperature unit, status=%d", status);
       }
     }
 
