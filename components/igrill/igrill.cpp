@@ -25,6 +25,11 @@ namespace esphome
 
       case ESP_GATTC_CONNECT_EVT:
       {
+        if (!is_same_address_(param->connect.remote_bda, this->parent()->get_remote_bda()))
+        {
+          ESP_LOGD(TAG, "This ESP_GATTC_CONNECT_EVT is not for me. (remote_bda mismatch");
+          break;
+        }
         ESP_LOGD(TAG, "Setting encryption");
         esp_ble_set_encryption(param->connect.remote_bda, ESP_BLE_SEC_ENCRYPT);
         break;
@@ -38,6 +43,11 @@ namespace esphome
 
       case ESP_GATTC_SEARCH_CMPL_EVT:
       {
+        if (param->search_cmpl.conn_id != this->parent()->get_conn_id())
+        {
+          ESP_LOGD(TAG, "This ESP_GATTC_SEARCH_CMPL_EVT is not for me. (conn_id mismatch");
+          break;
+        }
         // Detect IGrill model and get hadles for the appropriate number of probes.
         IGrill::detect_and_init_igrill_model_();
 
@@ -65,7 +75,10 @@ namespace esphome
       case ESP_GATTC_WRITE_CHAR_EVT:
       {
         if (param->write.conn_id != this->parent()->get_conn_id())
+        {
+          ESP_LOGD(TAG, "This ESP_GATTC_WRITE_CHAR_EVT is not for me. (conn_id mismatch");
           break;
+        }
         if (param->write.status != ESP_GATT_OK)
         {
           ESP_LOGW(TAG, "Error writing char at handle 0x%x, status=%d", param->write.handle, param->write.status);
@@ -88,7 +101,10 @@ namespace esphome
       case ESP_GATTC_READ_CHAR_EVT:
       {
         if (param->read.conn_id != this->parent()->get_conn_id())
+        {
+          ESP_LOGD(TAG, "This ESP_GATTC_READ_CHAR_EVT is not for me. (conn_id mismatch");
           break;
+        }
         if (param->read.status != ESP_GATT_OK)
         {
           ESP_LOGW(TAG, "Error reading char at handle 0x%x, status=%d", param->read.handle, param->read.status);
@@ -400,6 +416,21 @@ namespace esphome
           ESP_LOGW(TAG, "Error sending read request for sensor, status=%d", status);
         }
       }
+    }
+
+    bool IGrill::is_same_address_(uint8_t *a, uint8_t *b)
+    {
+      for (size_t i = 0; i < 6; i++)
+      {
+        if (a[i] != b[i])
+        {
+          ESP_LOGD(TAG, "Addresses do not match a: %02X:%02X:%02X:%02X:%02X:%02X b: %02X:%02X:%02X:%02X:%02X:%02X",
+                   a[0], a[1], a[2], a[3], a[4], a[5], b[0], b[1], b[2], b[3], b[4], b[5]);
+          return false;
+        }
+      }
+
+      return true;
     }
 
     void IGrill::dump_config()
