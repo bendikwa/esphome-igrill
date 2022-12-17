@@ -285,38 +285,29 @@ namespace esphome
         temp = this->unplugged_probe_value_;
         publish = send_value_when_unplugged_;
       }
-      switch (probe)
+      if (publish)
       {
-      case 1:
-        if (publish)
+        switch (probe)
         {
+        case 1:
           this->temperature_probe1_sensor_->publish_state(temp);
-        }
-        break;
+          break;
 
-      case 2:
-        if (publish)
-        {
+        case 2:
           this->temperature_probe2_sensor_->publish_state(temp);
-        }
-        break;
+          break;
 
-      case 3:
-        if (publish)
-        {
+        case 3:
           this->temperature_probe3_sensor_->publish_state(temp);
-        }
-        break;
+          break;
 
-      case 4:
-        if (publish)
-        {
+        case 4:
           this->temperature_probe4_sensor_->publish_state(temp);
-        }
-        break;
+          break;
 
-      default:
-        break;
+        default:
+          break;
+        }
       }
     }
 
