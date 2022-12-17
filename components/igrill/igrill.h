@@ -66,6 +66,7 @@ namespace esphome
     protected:
       void detect_and_init_igrill_model_();
       bool has_service_(const char *service);
+      bool is_same_address_(uint8_t *a, uint8_t *b);
       void get_temperature_probe_handles_(const char *service);
       uint16_t get_handle_(const char *service, const char *chr);
       void read_battery_(uint8_t *value, uint16_t value_len);
