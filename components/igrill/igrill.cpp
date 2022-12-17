@@ -311,7 +311,6 @@ namespace esphome
       }
     }
 
-    // TODO Hande update()
     void IGrill::update()
     {
       switch (this->node_state)
