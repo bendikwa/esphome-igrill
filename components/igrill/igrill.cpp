@@ -253,7 +253,7 @@ namespace esphome
       {
         this->unit_of_measurement_ = CELCIUS_UNIT_STRING;
       }
-      ESP_LOGW(TAG, "Setting temperature unit based on device: %s", this->unit_of_measurement_.c_str());
+      ESP_LOGI(TAG, "Setting temperature unit based on device: %s", this->unit_of_measurement_.c_str());
 
       if (this->temperature_probe1_sensor_ != nullptr)
       {
