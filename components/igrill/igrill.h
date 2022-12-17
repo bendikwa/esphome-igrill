@@ -60,7 +60,7 @@ namespace esphome
       void set_temperature_probe4(sensor::Sensor *temperature) { temperature_probe4_sensor_ = temperature; }
       void set_propane(sensor::Sensor *propane) { propane_level_sensor_ = propane; }
       void set_battery(sensor::Sensor *battery) { battery_level_sensor_ = battery; }
-      void set_send_value_when_unplugged(bool send_value_when_unplugged) { ESP_LOGCONFIG("igrill", "send_value_when_unplugged: %d", send_value_when_unplugged); send_value_when_unplugged_ = send_value_when_unplugged; }
+      void set_send_value_when_unplugged(bool send_value_when_unplugged) { ESP_LOGE("igrill", "send_value_when_unplugged: %d", send_value_when_unplugged); send_value_when_unplugged_ = send_value_when_unplugged; }
       void set_unplugged_probe_value(float unplugged_probe_value) {unplugged_probe_value_ = unplugged_probe_value; }
 
     protected:
