@@ -284,6 +284,7 @@ namespace esphome
       {
         temp = this->unplugged_probe_value_;
         publish = send_value_when_unplugged_;
+        ESP_LOGW(TAG, "send_value_when_unplugged_: %d", send_value_when_unplugged_);
       }
       if (publish)
       {
