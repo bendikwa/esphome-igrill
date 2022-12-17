@@ -408,7 +408,7 @@ namespace esphome
       }
 
       // Read propane level
-      if (this->propane_level_handle_)
+      if (this->propane_level_sensor_ != nullptr)
       {
         status = esp_ble_gattc_read_char(this->parent()->get_gattc_if(), this->parent()->get_conn_id(), this->propane_level_handle_, ESP_GATT_AUTH_REQ_NONE);
         if (status)
