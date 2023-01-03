@@ -36,9 +36,9 @@ In principle, all IGrill devices, including the Pulse2000 is supported, but I do
 
 - [x] IGrill mini
 - [ ] IGrill mini V2
-- [x] Igrill V2 - Thanks to [stogs](https://github.com/stogs) for verifying
-- [ ] Igrill V202
-- [x] Igrill V3
+- [x] IGrill V2 - Thanks to [stogs](https://github.com/stogs) for verifying
+- [X] IGrill V202
+- [x] IGrill V3
 - [ ] Weber Pulse2000
 
 If you own one of the untested models, I would be thankfull if you create a ticket so we can get it confirmed working.
