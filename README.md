@@ -57,7 +57,7 @@ sensor:
     ble_client_id: igrillv3
     update_interval: 30s # default
     battery_level:
-      name: "IGill v3 battery"
+      name: "IGrill v3 battery"
     temperature_probe1:
       name: "IGrill v3 temp 1"
     temperature_probe2:
