@@ -59,13 +59,13 @@ sensor:
     battery_level:
       name: "IGill v3 battery"
     temperature_probe1:
-      name: "IGrill v3 temp 1"
+      name: "IGill v3 temp 1"
     temperature_probe2:
-      name: "IGrill v3 temp 2"
+      name: "IGill v3 temp 2"
     temperature_probe3:
-      name: "IGrill v3 temp 3"
+      name: "IGill v3 temp 3"
     temperature_probe4:
-      name: "IGrill v3 temp 4"
+      name: "IGill v3 temp 4"
 ```
 ## Configuration variables
 - **update_interval** (*Optional,* [Time](https://esphome.io/guides/configuration-types.html#config-time)) The interval between each read and publish of sensor values. Defaults to "30s"
