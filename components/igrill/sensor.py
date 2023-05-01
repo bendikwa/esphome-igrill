@@ -7,7 +7,6 @@ from esphome.const import (
     CONF_ID,
     DEVICE_CLASS_BATTERY,
     DEVICE_CLASS_TEMPERATURE,
-    DEVICE_CLASS_GAS,
     ENTITY_CATEGORY_DIAGNOSTIC,
     STATE_CLASS_MEASUREMENT,
     UNIT_PERCENT,
@@ -62,7 +61,6 @@ CONFIG_SCHEMA = cv.All(
             cv.Optional(CONF_PROPANE_LEVEL): sensor.sensor_schema(
                 unit_of_measurement=UNIT_PERCENT,
                 accuracy_decimals=0,
-                device_class=DEVICE_CLASS_GAS,
                 state_class=STATE_CLASS_MEASUREMENT,
                 entity_category=ENTITY_CATEGORY_DIAGNOSTIC,
             ),
