@@ -191,6 +191,18 @@ namespace esphome
         num_probes = 4;
         service = IGRILLV3_TEMPERATURE_SERVICE_UUID;
       }
+      else if (has_service_(PULSE_1000_TEMPERATURE_SERVICE_UUID))
+      {
+        ESP_LOGI(TAG, "Detected model: Pulse 1000");
+        num_probes = 4;
+        service = PULSE_1000_TEMPERATURE_SERVICE_UUID;
+      }
+      else if (has_service_(PULSE_2000_TEMPERATURE_SERVICE_UUID))
+      {
+        ESP_LOGI(TAG, "Detected model: Pulse 2000");
+        num_probes = 4;
+        service = PULSE_2000_TEMPERATURE_SERVICE_UUID;
+      }
       else
       {
         ESP_LOGE(TAG, "Could not identify IGrill model");
