@@ -295,6 +295,7 @@ namespace esphome
       }
       if (publish)
       {
+        sleep(1);
         this->sensors_[probe]->publish_state(temp);
       }
     }
