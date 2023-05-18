@@ -270,11 +270,11 @@ namespace esphome
         this->unit_of_measurement_ = CELCIUS_UNIT_STRING;
       }
       ESP_LOGI(TAG, "Setting temperature unit based on device: %s", this->unit_of_measurement_);
-      for (auto & element : this->sensors_)
+      for (auto & sensor : this->sensors_)
       {
-        if (element)
+        if (sensor)
         {
-          element->set_unit_of_measurement(this->unit_of_measurement_);
+          sensor->set_unit_of_measurement(this->unit_of_measurement_);
         }
       }
       request_read_values_();
