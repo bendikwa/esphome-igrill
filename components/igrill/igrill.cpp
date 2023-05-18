@@ -115,10 +115,11 @@ namespace esphome
         {
           if (value_readers_.count(param->read.handle))
           {
+            ESP_LOGD(TAG, "Read char event received for handle: 0x%x", param->read.handle);
             (this->*value_readers_[param->read.handle])(param->read.value, param->read.value_len);
           }
           else{
-            ESP_LOGD(TAG, "No read function defined for handle. (0x%x)", param->read.handle);
+            ESP_LOGD(TAG, "No read function defined for handle: 0x%x", param->read.handle);
           }
         }
         break;
