@@ -371,6 +371,7 @@ namespace esphome
       // Read battery level
       ESP_LOGD(TAG, "Requesting read of battery level on handle (0x%x)", this->battery_level_handle_);
       auto status = esp_ble_gattc_read_char(this->parent()->get_gattc_if(), this->parent()->get_conn_id(), this->battery_level_handle_, ESP_GATT_AUTH_REQ_NONE);
+      if (status)
       {
         ESP_LOGW(TAG, "Error sending read request for sensor, status=%d, handle=0x%x", status, this->battery_level_handle_);
       }
