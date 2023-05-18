@@ -181,6 +181,7 @@ namespace esphome
       }
       IGrill::add_temperature_probe_handles_(service);
       this->temperature_unit_handle_ = get_handle_(service, TEMPERATURE_UNIT_UUID);
+      this->value_readers_[this->temperature_unit_handle_] = &IGrill::read_temperature_unit_;
     }
 
     bool IGrill::has_service_(const char *service)
@@ -202,9 +203,10 @@ namespace esphome
       {
         if (this->sensors_[i]) // only add handles for configured sensors
         {
-          ESP_LOGD(TAG, "Probe nuber %d added.", i);
-          this->probe_handles_.push_back(get_handle_(service, probes[i]));
-          this->value_readers_[get_handle_(service, probes[i])] = read_functions[i];
+          uint16_t probe_handle = get_handle_(service, probes[i]);
+          this->probe_handles_.push_back(probe_handle);
+          this->value_readers_[probe_handle] = read_functions[i];
+          ESP_LOGD(TAG, "Probe nuber %d added with handle 0x%x.", i, probe_handle);
         }
         else
         {
