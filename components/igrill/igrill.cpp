@@ -249,7 +249,7 @@ namespace esphome
       if (probe_unplugged)
       {
         temp = this->unplugged_probe_value_;
-        publish = send_value_when_unplugged_;
+        publish = this->send_value_when_unplugged_;
       }
       ESP_LOGD(TAG, "Temp %f: publish: %d", temp, publish);
       return;
