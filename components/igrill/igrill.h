@@ -4,6 +4,7 @@
 #include <esp_gattc_api.h>
 #include <algorithm>
 #include <iterator>
+#include <map>
 #include <vector>
 #include "esphome/components/ble_client/ble_client.h"
 #include "esphome/components/esp32_ble_tracker/esp32_ble_tracker.h"
@@ -66,7 +67,7 @@ namespace esphome
       void detect_and_init_igrill_model_();
       bool has_service_(const char *service);
       bool is_same_address_(uint8_t *a, uint8_t *b);
-      void get_temperature_probe_handles_(const char *service);
+      void add_temperature_probe_handles_(const char *service);
       uint16_t get_handle_(const char *service, const char *chr);
       void read_battery_(uint8_t *value, uint16_t value_len);
       void read_temperature_unit_(uint8_t *value, uint16_t value_len);
@@ -96,16 +97,13 @@ namespace esphome
       sensor::Sensor *propane_level_sensor_{nullptr};
 
       uint16_t app_challenge_handle_;
+      uint16_t battery_level_handle_;
       uint16_t device_challenge_handle_;
       uint16_t device_response_handle_;
-      uint16_t temperature_unit_handle_;
-      uint16_t probe1_handle_;
-      uint16_t probe2_handle_;
-      uint16_t probe3_handle_;
-      uint16_t probe4_handle_;
+      std::vector<uint16_t> probe_handles_;
       uint16_t propane_level_handle_;
-      std::vector<uint16_t *> handles = {&probe1_handle_, &probe2_handle_, &probe3_handle_, &probe4_handle_};
-      uint16_t battery_level_handle_;
+      std::map<uint16_t, void (esphome::igrill::IGrill::*)(uint8_t *, uint16_t)> value_readers_;
+      uint16_t temperature_unit_handle_;
     };
 
   } // namespace igrill

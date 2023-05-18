@@ -53,17 +53,20 @@ namespace esphome
 
         // Get handle for battery level
         this->battery_level_handle_ = get_handle_(BATTERY_SERVICE_UUID, BATTERY_LEVEL_UUID);
+        this->value_readers_[this->battery_level_handle_] = &read_battery_;
 
         // Get handle for propane level, if configured
         if (this->propane_level_sensor_ != nullptr)
         {
           this->propane_level_handle_ = get_handle_(PROPANE_LEVEL_SERVICE_UUID, PROPANE_LEVEL);
+          this->value_readers_[this->propane_level_handle_] = &read_propane_;
         }
 
         // Get handles for authentication
         this->app_challenge_handle_ = get_handle_(AUTHENTICATION_SERVICE_UUID, APP_CHALLENGE_UUID);
         this->device_response_handle_ = get_handle_(AUTHENTICATION_SERVICE_UUID, DEVICE_RESPONSE_UUID);
         this->device_challenge_handle_ = get_handle_(AUTHENTICATION_SERVICE_UUID, DEVICE_CHALLENGE_UUID);
+        this->value_readers_[this->device_challenge_handle_] = &loopback_device_challenge_response_;
 
         ESP_LOGD(TAG, "Starting autheintication process");
         send_authentication_challenge_();
@@ -103,52 +106,20 @@ namespace esphome
         if (param->read.conn_id != this->parent()->get_conn_id())
         {
           ESP_LOGD(TAG, "This ESP_GATTC_READ_CHAR_EVT is not for me. (conn_id mismatch");
-          break;
         }
-        if (param->read.status != ESP_GATT_OK)
+        else if (param->read.status != ESP_GATT_OK)
         {
           ESP_LOGW(TAG, "Error reading char at handle 0x%x, status=%d", param->read.handle, param->read.status);
-          break;
         }
-        if (param->read.handle == this->battery_level_handle_)
+        else
         {
-          read_battery_(param->read.value, param->read.value_len);
-          break;
-        }
-        else if (param->read.handle == this->propane_level_handle_)
-        {
-          read_propane_(param->read.value, param->read.value_len);
-          break;
-        }
-        else if (param->read.handle == this->probe1_handle_)
-        {
-          read_temperature1_(param->read.value, param->read.value_len);
-          break;
-        }
-        else if (param->read.handle == this->probe2_handle_)
-        {
-          read_temperature2_(param->read.value, param->read.value_len);
-          break;
-        }
-        else if (param->read.handle == this->probe3_handle_)
-        {
-          read_temperature3_(param->read.value, param->read.value_len);
-          break;
-        }
-        else if (param->read.handle == this->probe4_handle_)
-        {
-          read_temperature4_(param->read.value, param->read.value_len);
-          break;
-        }
-        else if (param->read.handle == this->temperature_unit_handle_)
-        {
-          read_temperature_unit_(param->read.value, param->read.value_len);
-          break;
-        }
-        else if (param->read.handle == this->device_challenge_handle_)
-        {
-          loopback_device_challenge_response_(param->read.value, param->read.value_len);
-          break;
+          if (value_readers_.count(param->read.handle))
+          {
+            (this->*value_readers_[param->read.handle])(param->read.value, param->read.value_len);
+          }
+          else{
+            ESP_LOGD(TAG, "No read function defined for handle. (0x%x)", param->read.handle);
+          }
         }
         break;
       }
@@ -208,7 +179,7 @@ namespace esphome
         ESP_LOGE(TAG, "Could not identify IGrill model");
         return;
       }
-      IGrill::get_temperature_probe_handles_(service);
+      IGrill::add_temperature_probe_handles_(service);
       this->temperature_unit_handle_ = get_handle_(service, TEMPERATURE_UNIT_UUID);
     }
 
@@ -223,12 +194,22 @@ namespace esphome
       return true;
     }
 
-    void IGrill::get_temperature_probe_handles_(const char *service)
+    void IGrill::add_temperature_probe_handles_(const char *service)
     {
       std::vector<const char *> probes = {PROBE1_TEMPERATURE, PROBE2_TEMPERATURE, PROBE3_TEMPERATURE, PROBE4_TEMPERATURE};
+      std::vector<void (esphome::igrill::IGrill::*)(uint8_t *, uint16_t)> read_functions = {&read_temperature1_, &read_temperature2_, &read_temperature3_, &read_temperature4_};
       for (int i = 0; i < this->num_probes; i++)
       {
-        *this->handles[i] = get_handle_(service, probes[i]);
+        if (this->sensors_[i]) // only add handles for configured sensors
+        {
+          ESP_LOGD(TAG, "Probe nuber %d added.", i);
+          this->probe_handles_.push_back(get_handle_(service, probes[i]));
+          this->value_readers_[get_handle_(service, probes[i])] = read_functions[i];
+        }
+        else
+        {
+          ESP_LOGD(TAG, "No sensor configured for probe nuber %d. Skipping", i);
+        }
       }
     }
 
@@ -370,9 +351,9 @@ namespace esphome
       }
 
       // Read temperature probes
-      for (int i = 0; i < this->num_probes; i++)
+      for (auto & probe_handle : probe_handles_)
       {
-        status = esp_ble_gattc_read_char(this->parent()->get_gattc_if(), this->parent()->get_conn_id(), *this->handles[i], ESP_GATT_AUTH_REQ_NONE);
+        status = esp_ble_gattc_read_char(this->parent()->get_gattc_if(), this->parent()->get_conn_id(), probe_handle, ESP_GATT_AUTH_REQ_NONE);
         if (status)
         {
           ESP_LOGW(TAG, "Error sending read request for sensor, status=%d", status);
