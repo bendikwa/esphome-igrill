@@ -242,28 +242,67 @@ namespace esphome
     void IGrill::read_temperature1_(uint8_t *value, uint16_t value_len)
     {
       uint16_t raw_temp = (value[1] << 8) | value[0];
-      ESP_LOGW(TAG, "Raw temp for probe 1: %d", raw_temp);
+      ESP_LOGD(TAG, "Parsing temperature from probe %d: Raw_temp = %s", probe, raw_temp);
+      bool probe_unplugged = raw_temp == UNPLUGGED_PROBE_CONSTANT;
+      bool publish = true;
+      float temp = (float)raw_temp;
+      if (probe_unplugged)
+      {
+        temp = this->unplugged_probe_value_;
+        publish = send_value_when_unplugged_;
+      }
+      ESP_LOGD(TAG, "Temp %f: publish: %d", temp, publish);
       return;
       IGrill::read_temperature_(value, value_len, 0); 
     }
 
     void IGrill::read_temperature2_(uint8_t *value, uint16_t value_len)
     {
-      ESP_LOGW(TAG, "Should have read temp for probe 2, but skipping");
+      uint16_t raw_temp = (value[1] << 8) | value[0];
+      ESP_LOGD(TAG, "Parsing temperature from probe %d: Raw_temp = %s", probe, raw_temp);
+      bool probe_unplugged = raw_temp == UNPLUGGED_PROBE_CONSTANT;
+      bool publish = true;
+      float temp = (float)raw_temp;
+      if (probe_unplugged)
+      {
+        temp = this->unplugged_probe_value_;
+        publish = send_value_when_unplugged_;
+      }
+      ESP_LOGD(TAG, "Temp %f: publish: %d", temp, publish);
       return;
       IGrill::read_temperature_(value, value_len, 1);
     }
 
     void IGrill::read_temperature3_(uint8_t *value, uint16_t value_len)
     {
-      ESP_LOGW(TAG, "Should have read temp for probe 3, but skipping");
+      uint16_t raw_temp = (value[1] << 8) | value[0];
+      ESP_LOGD(TAG, "Parsing temperature from probe %d: Raw_temp = %s", probe, raw_temp);
+      bool probe_unplugged = raw_temp == UNPLUGGED_PROBE_CONSTANT;
+      bool publish = true;
+      float temp = (float)raw_temp;
+      if (probe_unplugged)
+      {
+        temp = this->unplugged_probe_value_;
+        publish = send_value_when_unplugged_;
+      }
+      ESP_LOGD(TAG, "Temp %f: publish: %d", temp, publish);
       return;
       IGrill::read_temperature_(value, value_len, 2);
     }
 
     void IGrill::read_temperature4_(uint8_t *value, uint16_t value_len)
     {
-      ESP_LOGW(TAG, "Should have read temp for probe 4, but skipping");
+      uint16_t raw_temp = (value[1] << 8) | value[0];
+      ESP_LOGD(TAG, "Parsing temperature from probe %d: Raw_temp = %s", probe, raw_temp);
+      bool probe_unplugged = raw_temp == UNPLUGGED_PROBE_CONSTANT;
+      bool publish = true;
+      float temp = (float)raw_temp;
+      if (probe_unplugged)
+      {
+        temp = this->unplugged_probe_value_;
+        publish = send_value_when_unplugged_;
+      }
+      ESP_LOGD(TAG, "Temp %f: publish: %d", temp, publish);
       return;
       IGrill::read_temperature_(value, value_len, 3);
     }
