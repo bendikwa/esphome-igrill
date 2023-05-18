@@ -207,7 +207,7 @@ namespace esphome
           uint16_t probe_handle = get_handle_(service, probes[i]);
           this->probe_handles_.push_back(probe_handle);
           this->value_readers_[probe_handle] = read_functions[i];
-          ESP_LOGD(TAG, "Probe nuber %d added with handle 0x%x.", i, probe_handle);
+          ESP_LOGD(TAG, "Probe nuber %d added with handle 0x%x and read_function %p.", i, probe_handle, read_functions[i]);
         }
         else
         {
