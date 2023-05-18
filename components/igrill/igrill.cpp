@@ -265,7 +265,7 @@ namespace esphome
       {
         this->unit_of_measurement_ = CELCIUS_UNIT_STRING;
       }
-      ESP_LOGI(TAG, "Setting temperature unit based on device: %s", this->unit_of_measurement_.c_str());
+      ESP_LOGI(TAG, "Setting temperature unit based on device: %s", this->unit_of_measurement_);
 
       if (this->temperature_probe1_sensor_ != nullptr)
       {
@@ -328,7 +328,7 @@ namespace esphome
       switch (this->node_state)
       {
       case esp32_ble_tracker::ClientState::ESTABLISHED:
-        if (this->unit_of_measurement_.empty())
+        if (!this->unit_of_measurement_)
         {
           ESP_LOGD(TAG, "Requesting read of temperature unit");
           request_temp_unit_read_();
