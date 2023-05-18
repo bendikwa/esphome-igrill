@@ -27,7 +27,7 @@ namespace esphome
       {
         if (!is_same_address_(param->connect.remote_bda, this->parent()->get_remote_bda()))
         {
-          ESP_LOGD(TAG, "This ESP_GATTC_CONNECT_EVT is not for me. (remote_bda mismatch");
+          ESP_LOGV(TAG, "This ESP_GATTC_CONNECT_EVT is not for me. (remote_bda mismatch");
           break;
         }
         ESP_LOGD(TAG, "Setting encryption");
@@ -45,7 +45,7 @@ namespace esphome
       {
         if (param->search_cmpl.conn_id != this->parent()->get_conn_id())
         {
-          ESP_LOGD(TAG, "This ESP_GATTC_SEARCH_CMPL_EVT is not for me. (conn_id mismatch");
+          ESP_LOGV(TAG, "This ESP_GATTC_SEARCH_CMPL_EVT is not for me. (conn_id mismatch");
           break;
         }
         // Detect IGrill model and get hadles for the appropriate number of probes.
@@ -79,7 +79,7 @@ namespace esphome
       {
         if (param->write.conn_id != this->parent()->get_conn_id())
         {
-          ESP_LOGD(TAG, "This ESP_GATTC_WRITE_CHAR_EVT is not for me. (conn_id mismatch");
+          ESP_LOGV(TAG, "This ESP_GATTC_WRITE_CHAR_EVT is not for me. (conn_id mismatch");
           break;
         }
         if (param->write.status != ESP_GATT_OK)
@@ -105,7 +105,7 @@ namespace esphome
       {
         if (param->read.conn_id != this->parent()->get_conn_id())
         {
-          ESP_LOGD(TAG, "This ESP_GATTC_READ_CHAR_EVT is not for me. (conn_id mismatch");
+          ESP_LOGV(TAG, "This ESP_GATTC_READ_CHAR_EVT is not for me. (conn_id mismatch");
         }
         else if (param->read.status != ESP_GATT_OK)
         {
@@ -115,8 +115,7 @@ namespace esphome
         {
           if (value_readers_.count(param->read.handle))
           {
-            ESP_LOGD(TAG, "Read char event received for handle: 0x%x", param->read.handle);
-            ESP_LOGD(TAG, "Attempting to use read_function with address: %p",value_readers_[param->read.handle]);
+            ESP_LOGV(TAG, "Read char event received for handle: 0x%x", param->read.handle);
             (this->*value_readers_[param->read.handle])(param->read.value, param->read.value_len);
           }
           else{
@@ -208,7 +207,7 @@ namespace esphome
           uint16_t probe_handle = get_handle_(service, probes[i]);
           this->probe_handles_.push_back(probe_handle);
           this->value_readers_[probe_handle] = read_functions[i];
-          ESP_LOGD(TAG, "Probe nuber %d added with handle 0x%x", i, probe_handle);
+          ESP_LOGV(TAG, "Probe nuber %d added with handle 0x%x", i, probe_handle);
         }
         else
         {
@@ -283,8 +282,7 @@ namespace esphome
     
     void IGrill::read_temperature_(uint8_t *raw_value, uint16_t value_len, int probe)
     {
-      ESP_LOGD(TAG, "Parsing temperature from probe %d: raw_value: %p value_len: %d", probe, raw_value, value_len);
-      ESP_LOGD(TAG, "raw_temp: %d", (raw_value[1] << 8) | raw_value[0]);
+      ESP_LOGD(TAG, "Parsing temperature from probe %d: raw_temp: %f value_len: %d", probe, ((float)(raw_value[1] << 8) | raw_value[0]), value_len);
       uint16_t raw_temp = (raw_value[1] << 8) | raw_value[0];
       ESP_LOGD(TAG, "Parsing temperature from probe %d: Raw_temp = %s", probe, raw_temp);
       bool probe_unplugged = raw_temp == UNPLUGGED_PROBE_CONSTANT;
