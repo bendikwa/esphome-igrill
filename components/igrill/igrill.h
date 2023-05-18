@@ -57,7 +57,7 @@ namespace esphome
       void update() override;
 
       void gattc_event_handler(esp_gattc_cb_event_t event, esp_gatt_if_t gattc_if, esp_ble_gattc_cb_param_t *param) override;
-      void set_temperature_probe(sensor::Sensor *temperature, int probe_num) { sensors_[probe_num] = temperature; }
+      void set_temperature_probe(sensor::Sensor *temperature, int probe_num) { sensors_[probe_num-1] = temperature; }
       void set_propane(sensor::Sensor *propane) { propane_level_sensor_ = propane; }
       void set_battery(sensor::Sensor *battery) { battery_level_sensor_ = battery; }
       void set_send_value_when_unplugged(bool send_value_when_unplugged) { ESP_LOGE("igrill", "send_value_when_unplugged: %d", send_value_when_unplugged); send_value_when_unplugged_ = send_value_when_unplugged; }
