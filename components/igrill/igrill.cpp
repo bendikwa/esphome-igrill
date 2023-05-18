@@ -211,7 +211,7 @@ namespace esphome
         }
         else
         {
-          ESP_LOGD(TAG, "No sensor configured for probe nuber %d. Skipping", i);
+          ESP_LOGD(TAG, "No sensor configured for probe nuber %d. Skipping", i+1);
         }
       }
     }
