@@ -241,7 +241,8 @@ namespace esphome
 
     void IGrill::read_temperature1_(uint8_t *value, uint16_t value_len)
     {
-      ESP_LOGW(TAG, "Should have read temp for probe 1, but skipping");
+      uint16_t raw_temp = (value[1] << 8) | value[0];
+      ESP_LOGW(TAG, "Raw temp for probe 1: %d", raw_temp);
       return;
       IGrill::read_temperature_(value, value_len, 0); 
     }
