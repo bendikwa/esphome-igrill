@@ -282,7 +282,7 @@ namespace esphome
     
     void IGrill::read_temperature_(uint8_t *raw_value, uint16_t value_len, int probe)
     {
-      ESP_LOGD(TAG, "Parsing temperature from probe %d: raw_temp: %f value_len: %d", probe, ((float)(raw_value[1] << 8) | raw_value[0]), value_len);
+      ESP_LOGD(TAG, "Parsing temp for probe %d", probe + 1); 
       uint16_t raw_temp = (raw_value[1] << 8) | raw_value[0];
       ESP_LOGD(TAG, "Parsing temperature from probe %d: Raw_temp = %s", probe, raw_temp);
       bool probe_unplugged = raw_temp == UNPLUGGED_PROBE_CONSTANT;
