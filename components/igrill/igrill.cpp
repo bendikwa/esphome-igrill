@@ -122,22 +122,22 @@ namespace esphome
         }
         else if (param->read.handle == this->probe1_handle_)
         {
-          read_temperature_(param->read.value, param->read.value_len, 1);
+          read_temperature1_(param->read.value, param->read.value_len);
           break;
         }
         else if (param->read.handle == this->probe2_handle_)
         {
-          read_temperature_(param->read.value, param->read.value_len, 2);
+          read_temperature2_(param->read.value, param->read.value_len);
           break;
         }
         else if (param->read.handle == this->probe3_handle_)
         {
-          read_temperature_(param->read.value, param->read.value_len, 3);
+          read_temperature3_(param->read.value, param->read.value_len);
           break;
         }
         else if (param->read.handle == this->probe4_handle_)
         {
-          read_temperature_(param->read.value, param->read.value_len, 4);
+          read_temperature4_(param->read.value, param->read.value_len);
           break;
         }
         else if (param->read.handle == this->temperature_unit_handle_)

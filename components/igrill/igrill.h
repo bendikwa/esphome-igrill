@@ -71,6 +71,10 @@ namespace esphome
       void read_battery_(uint8_t *value, uint16_t value_len);
       void read_temperature_unit_(uint8_t *value, uint16_t value_len);
       void read_propane_(uint8_t *value, uint16_t value_len);
+      void read_temperature1_(uint8_t *value, uint16_t value_len) {read_temperature_(value, value_len, 1);}
+      void read_temperature2_(uint8_t *value, uint16_t value_len) {read_temperature_(value, value_len, 2);}
+      void read_temperature3_(uint8_t *value, uint16_t value_len) {read_temperature_(value, value_len, 3);}
+      void read_temperature4_(uint8_t *value, uint16_t value_len) {read_temperature_(value, value_len, 4);}
       void read_temperature_(uint8_t *value, uint16_t value_len, int probe);
       void request_read_values_();
       void request_temp_unit_read_();
