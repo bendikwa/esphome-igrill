@@ -243,8 +243,11 @@ namespace esphome
     {
       ESP_LOGW(TAG, "Should have read temp for probe 1, but skipping");
       uint16_t raw_temp = (value[1] << 8) | value[0];
-      ESP_LOGD(TAG, "just logging one of the values: %d", raw_temp);
-      ESP_LOGD(TAG, "just logging one of the values: %d", UNPLUGGED_PROBE_CONSTANT);
+      bool probe_unplugged = raw_temp == UNPLUGGED_PROBE_CONSTANT;
+      bool publish = true;
+      float temp = (float)raw_temp;
+      ESP_LOGD(TAG, "just logging one of the values: %f", temp);
+      ESP_LOGD(TAG, "just logging one of the values: %d", probe_unplugged);
       return;
       IGrill::read_temperature_(value, value_len, 0); 
     }
