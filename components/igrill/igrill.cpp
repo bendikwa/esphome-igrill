@@ -241,8 +241,16 @@ namespace esphome
 
     void IGrill::read_temperature1_(uint8_t *value, uint16_t value_len)
     {
-      uint16_t raw_temp = (value[1] << 8) | value[0];
-      ESP_LOGD(TAG, "Parsing temperature from probe %d: Raw_temp = %s", 1, raw_temp);
+      ESP_LOGW(TAG, "Should have read temp for probe 1, but skipping");
+      ESP_LOGD(TAG, "just logging");
+      ESP_LOGD(TAG, "just logging");
+      ESP_LOGD(TAG, "just logging");
+      ESP_LOGD(TAG, "just logging");
+      ESP_LOGD(TAG, "just logging");
+      ESP_LOGD(TAG, "just logging");
+      ESP_LOGD(TAG, "just logging");
+      ESP_LOGD(TAG, "just logging");
+      ESP_LOGD(TAG, "just logging");
       return;
       IGrill::read_temperature_(value, value_len, 0); 
     }
