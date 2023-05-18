@@ -53,20 +53,20 @@ namespace esphome
 
         // Get handle for battery level
         this->battery_level_handle_ = get_handle_(BATTERY_SERVICE_UUID, BATTERY_LEVEL_UUID);
-        this->value_readers_[this->battery_level_handle_] = &read_battery_;
+        this->value_readers_[this->battery_level_handle_] = &IGrill::read_battery_;
 
         // Get handle for propane level, if configured
         if (this->propane_level_sensor_ != nullptr)
         {
           this->propane_level_handle_ = get_handle_(PROPANE_LEVEL_SERVICE_UUID, PROPANE_LEVEL);
-          this->value_readers_[this->propane_level_handle_] = &read_propane_;
+          this->value_readers_[this->propane_level_handle_] = &IGrill::read_propane_;
         }
 
         // Get handles for authentication
         this->app_challenge_handle_ = get_handle_(AUTHENTICATION_SERVICE_UUID, APP_CHALLENGE_UUID);
         this->device_response_handle_ = get_handle_(AUTHENTICATION_SERVICE_UUID, DEVICE_RESPONSE_UUID);
         this->device_challenge_handle_ = get_handle_(AUTHENTICATION_SERVICE_UUID, DEVICE_CHALLENGE_UUID);
-        this->value_readers_[this->device_challenge_handle_] = &loopback_device_challenge_response_;
+        this->value_readers_[this->device_challenge_handle_] = &IGrill::loopback_device_challenge_response_;
 
         ESP_LOGD(TAG, "Starting autheintication process");
         send_authentication_challenge_();
@@ -197,7 +197,7 @@ namespace esphome
     void IGrill::add_temperature_probe_handles_(const char *service)
     {
       std::vector<const char *> probes = {PROBE1_TEMPERATURE, PROBE2_TEMPERATURE, PROBE3_TEMPERATURE, PROBE4_TEMPERATURE};
-      std::vector<void (esphome::igrill::IGrill::*)(uint8_t *, uint16_t)> read_functions = {&read_temperature1_, &read_temperature2_, &read_temperature3_, &read_temperature4_};
+      std::vector<void (esphome::igrill::IGrill::*)(uint8_t *, uint16_t)> read_functions = {&IGrill::read_temperature1_, &IGrill::read_temperature2_, &IGrill::read_temperature3_, &IGrill::read_temperature4_};
       for (int i = 0; i < this->num_probes; i++)
       {
         if (this->sensors_[i]) // only add handles for configured sensors
