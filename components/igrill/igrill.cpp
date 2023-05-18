@@ -327,51 +327,52 @@ namespace esphome
 
     void IGrill::request_device_challenge_read_()
     {
-      ESP_LOGD(TAG, "Requesting read of encrypted device response from device");
+      ESP_LOGD(TAG, "Requesting read of encrypted device response from device on handle (0x%x)", this->device_challenge_handle_);
       auto status = esp_ble_gattc_read_char(this->parent()->get_gattc_if(), this->parent()->get_conn_id(), this->device_challenge_handle_, ESP_GATT_AUTH_REQ_NONE);
       if (status)
       {
-        ESP_LOGW(TAG, "Error sending read request for device_challenge, status=%d", status);
+        ESP_LOGW(TAG, "Error sending read request for device_challenge, status=%d, handle=0x%x", status, this->device_challenge_handle_);
       }
     }
 
     void IGrill::request_temp_unit_read_()
     {
+      ESP_LOGD(TAG, "Requesting read of temperature unit on handle (0x%x)", this->battery_level_handle_);
       auto status = esp_ble_gattc_read_char(this->parent()->get_gattc_if(), this->parent()->get_conn_id(), this->temperature_unit_handle_, ESP_GATT_AUTH_REQ_NONE);
       if (status)
       {
-        ESP_LOGW(TAG, "Error sending read request for temperature unit, status=%d", status);
+        ESP_LOGW(TAG, "Error sending read request for temperature unit, status=%d, handle=0x%x", status, this->temperature_unit_handle_);
       }
     }
 
     void IGrill::request_read_values_()
     {
       // Read battery level
+      ESP_LOGD(TAG, "Requesting read of battery level on handle (0x%x)", this->battery_level_handle_);
       auto status = esp_ble_gattc_read_char(this->parent()->get_gattc_if(), this->parent()->get_conn_id(), this->battery_level_handle_, ESP_GATT_AUTH_REQ_NONE);
-      ESP_LOGD(TAG, "Requested read of battery level on handle (0x%x)", this->battery_level_handle_);
       {
-        ESP_LOGW(TAG, "Error sending read request for sensor, status=%d", status);
+        ESP_LOGW(TAG, "Error sending read request for sensor, status=%d, handle=0x%x", status, this->battery_level_handle_);
       }
 
       // Read temperature probes
       for (auto & probe_handle : probe_handles_)
       {
+        ESP_LOGD(TAG, "Requesting read of temperature probe on handle (0x%x)", probe_handle);
         status = esp_ble_gattc_read_char(this->parent()->get_gattc_if(), this->parent()->get_conn_id(), probe_handle, ESP_GATT_AUTH_REQ_NONE);
-        ESP_LOGD(TAG, "Requested read of temperature probe on handle (0x%x)", probe_handle);
         if (status)
         {
-          ESP_LOGW(TAG, "Error sending read request for sensor, status=%d", status);
+          ESP_LOGW(TAG, "Error sending read request for sensor, status=%d, handle=0x%x", status, probe_handle);
         }
       }
 
       // Read propane level
       if (this->propane_level_sensor_ != nullptr)
       {
+        ESP_LOGD(TAG, "Requesting read of propane level on handle (0x%x)", this->propane_level_handle_);
         status = esp_ble_gattc_read_char(this->parent()->get_gattc_if(), this->parent()->get_conn_id(), this->propane_level_handle_, ESP_GATT_AUTH_REQ_NONE);
-        ESP_LOGD(TAG, "Requested read of propane level on handle (0x%x)", this->propane_level_handle_);
         if (status)
         {
-          ESP_LOGW(TAG, "Error sending read request for sensor, status=%d", status);
+          ESP_LOGW(TAG, "Error sending read request for sensor, status=%d, handle=0x%x", status, this->propane_level_handle_);
         }
       }
     }
