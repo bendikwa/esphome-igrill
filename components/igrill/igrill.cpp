@@ -242,25 +242,21 @@ namespace esphome
 
     void IGrill::read_temperature1_(uint8_t *value, uint16_t value_len)
     {
-      ESP_LOGD(TAG, "Parsing temperature from probe 1");
       IGrill::read_temperature_(value, value_len, 0); 
     }
 
     void IGrill::read_temperature2_(uint8_t *value, uint16_t value_len)
     {
-      ESP_LOGD(TAG, "Parsing temperature from probe 2");
       IGrill::read_temperature_(value, value_len, 1);
     }
 
     void IGrill::read_temperature3_(uint8_t *value, uint16_t value_len)
     {
-      ESP_LOGD(TAG, "Parsing temperature from probe 3");
       IGrill::read_temperature_(value, value_len, 2);
     }
 
     void IGrill::read_temperature4_(uint8_t *value, uint16_t value_len)
     {
-      ESP_LOGD(TAG, "Parsing temperature from probe 4");
       IGrill::read_temperature_(value, value_len, 3);
     }
 
@@ -287,6 +283,7 @@ namespace esphome
     
     void IGrill::read_temperature_(uint8_t *raw_value, uint16_t value_len, int probe)
     {
+      ESP_LOGD(TAG, "Parsing temperature from probe %d", probe);
       uint16_t raw_temp = (raw_value[1] << 8) | raw_value[0];
       ESP_LOGD(TAG, "Parsing temperature from probe %d: Raw_temp = %s", probe, raw_temp);
       bool probe_unplugged = raw_temp == UNPLUGGED_PROBE_CONSTANT;
