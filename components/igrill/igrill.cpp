@@ -116,7 +116,7 @@ namespace esphome
           if (value_readers_.count(param->read.handle))
           {
             ESP_LOGD(TAG, "Read char event received for handle: 0x%x", param->read.handle);
-            ESP_LOGD(TAG, "attempting to use read_function with address: %p",value_readers_[param->read.handle]);
+            ESP_LOGD(TAG, "Attempting to use read_function with address: %p",value_readers_[param->read.handle]);
             (this->*value_readers_[param->read.handle])(param->read.value, param->read.value_len);
           }
           else{
@@ -208,7 +208,7 @@ namespace esphome
           uint16_t probe_handle = get_handle_(service, probes[i]);
           this->probe_handles_.push_back(probe_handle);
           this->value_readers_[probe_handle] = read_functions[i];
-          ESP_LOGD(TAG, "Probe nuber %d added with handle 0x%x and read_function %p.", i, probe_handle, read_functions[i]);
+          ESP_LOGD(TAG, "Probe nuber %d added with handle 0x%x", i, probe_handle);
         }
         else
         {
@@ -242,21 +242,25 @@ namespace esphome
 
     void IGrill::read_temperature1_(uint8_t *value, uint16_t value_len)
     {
+      ESP_LOGD(TAG, "Parsing temperature from probe 1");
       read_temperature_(value, value_len, 0); 
     }
 
     void IGrill::read_temperature2_(uint8_t *value, uint16_t value_len)
     {
+      ESP_LOGD(TAG, "Parsing temperature from probe 1");
       read_temperature_(value, value_len, 1);
     }
 
     void IGrill::read_temperature3_(uint8_t *value, uint16_t value_len)
     {
+      ESP_LOGD(TAG, "Parsing temperature from probe 1");
       read_temperature_(value, value_len, 2);
     }
 
     void IGrill::read_temperature4_(uint8_t *value, uint16_t value_len)
     {
+      ESP_LOGD(TAG, "Parsing temperature from probe 1");
       read_temperature_(value, value_len, 3);
     }
 
