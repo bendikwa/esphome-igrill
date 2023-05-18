@@ -84,7 +84,7 @@ namespace esphome
       int num_probes = 0;
       bool send_value_when_unplugged_;
       float unplugged_probe_value_;
-      std::string unit_of_measurement_;
+      const char *unit_of_measurement_{nullptr};
 
       sensor::Sensor *temperature_probe1_sensor_{nullptr};
       sensor::Sensor *temperature_probe2_sensor_{nullptr};
