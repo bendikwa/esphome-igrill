@@ -239,6 +239,26 @@ namespace esphome
       this->propane_level_sensor_->publish_state(((float)*raw_value * 25));
     }
 
+    void IGrill::read_temperature1_(uint8_t *value, uint16_t value_len)
+    {
+      read_temperature_(value, value_len, 0); 
+    }
+
+    void IGrill::read_temperature2_(uint8_t *value, uint16_t value_len)
+    {
+      read_temperature_(value, value_len, 1);
+    }
+
+    void IGrill::read_temperature3_(uint8_t *value, uint16_t value_len)
+    {
+      read_temperature_(value, value_len, 2);
+    }
+
+    void IGrill::read_temperature4_(uint8_t *value, uint16_t value_len)
+    {
+      read_temperature_(value, value_len, 3);
+    }
+
     void IGrill::read_temperature_unit_(uint8_t *raw_value, uint16_t value_len)
     {
       if (raw_value[0] == 0)
@@ -259,7 +279,7 @@ namespace esphome
       }
       request_read_values_();
     }
-
+    
     void IGrill::read_temperature_(uint8_t *raw_value, uint16_t value_len, int probe)
     {
       uint16_t raw_temp = (raw_value[1] << 8) | raw_value[0];
