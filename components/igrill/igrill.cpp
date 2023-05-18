@@ -266,22 +266,12 @@ namespace esphome
         this->unit_of_measurement_ = CELCIUS_UNIT_STRING;
       }
       ESP_LOGI(TAG, "Setting temperature unit based on device: %s", this->unit_of_measurement_);
-
-      if (this->temperature_probe1_sensor_ != nullptr)
+      for (auto & element : this->sensors_)
       {
-        temperature_probe1_sensor_->set_unit_of_measurement(this->unit_of_measurement_);
-      }
-      if (this->temperature_probe2_sensor_ != nullptr)
-      {
-        temperature_probe2_sensor_->set_unit_of_measurement(this->unit_of_measurement_);
-      }
-      if (this->temperature_probe3_sensor_ != nullptr)
-      {
-        temperature_probe3_sensor_->set_unit_of_measurement(this->unit_of_measurement_);
-      }
-      if (this->temperature_probe4_sensor_ != nullptr)
-      {
-        temperature_probe4_sensor_->set_unit_of_measurement(this->unit_of_measurement_);
+        if (element)
+        {
+          element->set_unit_of_measurement(this->unit_of_measurement_);
+        }
       }
       request_read_values_();
     }
@@ -299,27 +289,7 @@ namespace esphome
       }
       if (publish)
       {
-        switch (probe)
-        {
-        case 1:
-          this->temperature_probe1_sensor_->publish_state(temp);
-          break;
-
-        case 2:
-          this->temperature_probe2_sensor_->publish_state(temp);
-          break;
-
-        case 3:
-          this->temperature_probe3_sensor_->publish_state(temp);
-          break;
-
-        case 4:
-          this->temperature_probe4_sensor_->publish_state(temp);
-          break;
-
-        default:
-          break;
-        }
+        sensors_[probe]->publish_state(temp);
       }
     }
 
@@ -437,10 +407,13 @@ namespace esphome
 
     void IGrill::dump_config()
     {
-      LOG_SENSOR("  ", "Temperature", this->temperature_probe1_sensor_);
-      LOG_SENSOR("  ", "Temperature", this->temperature_probe2_sensor_);
-      LOG_SENSOR("  ", "Temperature", this->temperature_probe3_sensor_);
-      LOG_SENSOR("  ", "Temperature", this->temperature_probe4_sensor_);
+      for (auto & element : this->sensors_)
+      {
+        if (element)
+        {
+          LOG_SENSOR("  ", "Temperature", element);
+        }
+      }
       LOG_SENSOR("  ", "Battery Level", this->battery_level_sensor_);
       LOG_SENSOR("  ", "Propane Level", this->propane_level_sensor_);
     }
