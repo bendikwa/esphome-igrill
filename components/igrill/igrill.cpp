@@ -190,7 +190,7 @@ namespace esphome
       auto *srv = this->parent()->get_service(esp32_ble_tracker::ESPBTUUID::from_raw(service));
       if (srv == nullptr)
       {
-        ESP_LOGD(TAG, "No service found at service %s", service);
+        ESP_LOGV(TAG, "No service found at service %s", service);
         return false;
       }
       return true;
