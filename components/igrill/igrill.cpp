@@ -290,7 +290,7 @@ namespace esphome
         }
         else
         {
-          ESP_LOGD(TAG, "Requesting read of all probe values");
+          ESP_LOGD(TAG, "Requesting read of all values");
           request_read_values_();
         }
         break;
@@ -352,7 +352,7 @@ namespace esphome
       // Read battery level
       if (this->battery_level_sensor_ != nullptr)
       {
-        ESP_LOGD(TAG, "Requesting read of battery level on handle (0x%x)", this->battery_level_handle_);
+        ESP_LOGV(TAG, "Requesting read of battery level on handle (0x%x)", this->battery_level_handle_);
         status = esp_ble_gattc_read_char(this->parent()->get_gattc_if(), this->parent()->get_conn_id(), this->battery_level_handle_, ESP_GATT_AUTH_REQ_NONE);
         if (status)
         {
@@ -363,7 +363,7 @@ namespace esphome
       // Read temperature probes
       for (auto & probe_handle : probe_handles_)
       {
-        ESP_LOGD(TAG, "Requesting read of temperature probe on handle (0x%x)", probe_handle);
+        ESP_LOGV(TAG, "Requesting read of temperature probe on handle (0x%x)", probe_handle);
         status = esp_ble_gattc_read_char(this->parent()->get_gattc_if(), this->parent()->get_conn_id(), probe_handle, ESP_GATT_AUTH_REQ_NONE);
         if (status)
         {
@@ -374,7 +374,7 @@ namespace esphome
       // Read propane level
       if (this->propane_level_sensor_ != nullptr)
       {
-        ESP_LOGD(TAG, "Requesting read of propane level on handle (0x%x)", this->propane_level_handle_);
+        ESP_LOGV(TAG, "Requesting read of propane level on handle (0x%x)", this->propane_level_handle_);
         status = esp_ble_gattc_read_char(this->parent()->get_gattc_if(), this->parent()->get_conn_id(), this->propane_level_handle_, ESP_GATT_AUTH_REQ_NONE);
         if (status)
         {
