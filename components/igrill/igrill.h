@@ -62,7 +62,7 @@ namespace esphome
       void set_pulse_actual1(sensor::Sensor *pulse_actual) { pulse_heating_actual1_ = pulse_actual; }
       void set_pulse_actual2(sensor::Sensor *pulse_actual) { pulse_heating_actual2_ = pulse_actual; }
       void set_pulse_setpoint1(sensor::Sensor *pulse_setpoint) { pulse_heating_setpoint1_ = pulse_setpoint; }
-      void set_pulse_setpoint1(sensor::Sensor *pulse_setpoint) { pulse_heating_setpoint2_ = pulse_setpoint; }
+      void set_pulse_setpoint2(sensor::Sensor *pulse_setpoint) { pulse_heating_setpoint2_ = pulse_setpoint; }
       void set_propane(sensor::Sensor *propane) { propane_level_sensor_ = propane; }
       void set_battery(sensor::Sensor *battery) { battery_level_sensor_ = battery; }
       void set_send_value_when_unplugged(bool send_value_when_unplugged) { ESP_LOGE("igrill", "send_value_when_unplugged: %d", send_value_when_unplugged); send_value_when_unplugged_ = send_value_when_unplugged; }
