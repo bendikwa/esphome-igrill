@@ -1,5 +1,4 @@
 #include "igrill.h"
-#include <Esp.h>
 
 #ifdef USE_ESP32
 
@@ -240,33 +239,6 @@ namespace esphome
       this->propane_level_sensor_->publish_state(((float)*raw_value * 25));
     }
 
-    void IGrill::read_temperature1_(uint8_t *value, uint16_t value_len)
-    {
-      ESP_LOGD(TAG, "DEBUG: free heap: %u", ESP.getFreeHeap());
-      IGrill::read_temperature_(value, value_len, 0); 
-    }
-
-    void IGrill::read_temperature2_(uint8_t *value, uint16_t value_len)
-    {
-      ESP_LOGW(TAG, "Should have read temp for probe 2, but skipping");
-      return;
-      IGrill::read_temperature_(value, value_len, 1);
-    }
-
-    void IGrill::read_temperature3_(uint8_t *value, uint16_t value_len)
-    {
-      ESP_LOGW(TAG, "Should have read temp for probe 3, but skipping");
-      return;
-      IGrill::read_temperature_(value, value_len, 2);
-    }
-
-    void IGrill::read_temperature4_(uint8_t *value, uint16_t value_len)
-    {
-      ESP_LOGW(TAG, "Should have read temp for probe 4, but skipping");
-      return;
-      IGrill::read_temperature_(value, value_len, 3);
-    }
-
     void IGrill::read_temperature_unit_(uint8_t *raw_value, uint16_t value_len)
     {
       if (raw_value[0] == 0)
@@ -291,7 +263,7 @@ namespace esphome
     void IGrill::read_temperature_(uint8_t *raw_value, uint16_t value_len, int probe)
     {
       uint16_t raw_temp = (raw_value[1] << 8) | raw_value[0];
-      ESP_LOGD(TAG, "Parsing temperature from probe %d: Raw_temp = %s", probe, raw_temp);
+      ESP_LOGD(TAG, "Parsing temperature from probe %d", probe);
       bool probe_unplugged = raw_temp == UNPLUGGED_PROBE_CONSTANT;
       bool publish = true;
       float temp = (float)raw_temp;
@@ -376,12 +348,16 @@ namespace esphome
 
     void IGrill::request_read_values_()
     {
+      esp_err_t status = ESP_OK;
       // Read battery level
-      ESP_LOGD(TAG, "Requesting read of battery level on handle (0x%x)", this->battery_level_handle_);
-      auto status = esp_ble_gattc_read_char(this->parent()->get_gattc_if(), this->parent()->get_conn_id(), this->battery_level_handle_, ESP_GATT_AUTH_REQ_NONE);
-      if (status)
+      if (this->battery_level_sensor_ != nullptr)
       {
-        ESP_LOGW(TAG, "Error sending read request for sensor, status=%d, handle=0x%x", status, this->battery_level_handle_);
+        ESP_LOGD(TAG, "Requesting read of battery level on handle (0x%x)", this->battery_level_handle_);
+        status = esp_ble_gattc_read_char(this->parent()->get_gattc_if(), this->parent()->get_conn_id(), this->battery_level_handle_, ESP_GATT_AUTH_REQ_NONE);
+        if (status)
+        {
+          ESP_LOGW(TAG, "Error sending read request for sensor, status=%d, handle=0x%x", status, this->battery_level_handle_);
+        }
       }
 
       // Read temperature probes

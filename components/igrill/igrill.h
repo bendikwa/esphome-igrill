@@ -72,10 +72,10 @@ namespace esphome
       void read_battery_(uint8_t *value, uint16_t value_len);
       void read_temperature_unit_(uint8_t *value, uint16_t value_len);
       void read_propane_(uint8_t *value, uint16_t value_len);
-      void read_temperature1_(uint8_t *value, uint16_t value_len);
-      void read_temperature2_(uint8_t *value, uint16_t value_len);
-      void read_temperature3_(uint8_t *value, uint16_t value_len);
-      void read_temperature4_(uint8_t *value, uint16_t value_len);
+      void read_temperature1_(uint8_t *value, uint16_t value_len){ read_temperature_(value, value_len, 0); }
+      void read_temperature2_(uint8_t *value, uint16_t value_len){ read_temperature_(value, value_len, 1); }
+      void read_temperature3_(uint8_t *value, uint16_t value_len){ read_temperature_(value, value_len, 2); }
+      void read_temperature4_(uint8_t *value, uint16_t value_len){ read_temperature_(value, value_len, 3); }
       void read_temperature_(uint8_t *value, uint16_t value_len, int probe);
       void request_read_values_();
       void request_temp_unit_read_();
@@ -87,11 +87,7 @@ namespace esphome
       bool send_value_when_unplugged_;
       float unplugged_probe_value_;
       const char *unit_of_measurement_{nullptr};
-
-      sensor::Sensor *temperature_probe1_sensor_{nullptr};
-      sensor::Sensor *temperature_probe2_sensor_{nullptr};
-      sensor::Sensor *temperature_probe3_sensor_{nullptr};
-      sensor::Sensor *temperature_probe4_sensor_{nullptr};
+      
       std::vector<sensor::Sensor *> sensors_ = {nullptr, nullptr, nullptr, nullptr};
       sensor::Sensor *battery_level_sensor_{nullptr};
       sensor::Sensor *propane_level_sensor_{nullptr};
