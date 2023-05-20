@@ -406,6 +406,17 @@ namespace esphome
           ESP_LOGW(TAG, "Error sending read request for sensor, status=%d, handle=0x%x", status, this->propane_level_handle_);
         }
       }
+
+      // Read pulse element
+      if (pulse_heating_actual1_ || pulse_heating_actual2_ || pulse_heating_setpoint1_ || pulse_heating_setpoint2_)
+      {
+        ESP_LOGV(TAG, "Requesting read of pulse element on handle (0x%x)", this->pulse_element_handle_);
+        status = esp_ble_gattc_read_char(this->parent()->get_gattc_if(), this->parent()->get_conn_id(), this->pulse_element_handle_, ESP_GATT_AUTH_REQ_NONE);
+        if (status)
+        {
+          ESP_LOGW(TAG, "Error sending read request for sensor, status=%d, handle=0x%x", status, this->pulse_element_handle_);
+        }
+      }
     }
 
     bool IGrill::is_same_address_(uint8_t *a, uint8_t *b)
