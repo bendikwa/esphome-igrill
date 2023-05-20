@@ -407,8 +407,14 @@ namespace esphome
           LOG_SENSOR("  ", "Temperature", element);
         }
       }
-      LOG_SENSOR("  ", "Battery Level", this->battery_level_sensor_);
-      LOG_SENSOR("  ", "Propane Level", this->propane_level_sensor_);
+      if (this->battery_level_sensor_ != nullptr)
+      {
+        LOG_SENSOR("  ", "Battery Level", this->battery_level_sensor_);
+      }
+      if (this->propane_level_sensor_ != nullptr)
+      {
+        LOG_SENSOR("  ", "Propane Level", this->propane_level_sensor_);
+      }
     }
 
     IGrill::IGrill()
