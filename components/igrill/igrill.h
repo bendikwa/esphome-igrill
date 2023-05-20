@@ -36,8 +36,6 @@ namespace esphome
     static const char *const PROBE3_TEMPERATURE = "06ef0006-2e06-4b79-9e33-fce2c42805ec";
     static const char *const PROBE4_TEMPERATURE = "06ef0008-2e06-4b79-9e33-fce2c42805ec";
     static const char *const PULSE_ELEMENT_UUID = "6c91000a-58dc-41c7-943f-518b278ceaaa";
-
-    static const char *const HEATING_ELEMENT = "6c91000a-58dc-41c7-943f-518b278ceaaa";
     
     static const char *const PROPANE_LEVEL_SERVICE_UUID = "F5D40000-3548-4C22-9947-F3673FCE3CD9";
     static const char *const PROPANE_LEVEL = "f5d40001-3548-4c22-9947-f3673fce3cd9";
