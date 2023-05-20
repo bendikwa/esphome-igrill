@@ -166,7 +166,7 @@ namespace esphome
       else if (has_service_(PULSE_1000_TEMPERATURE_SERVICE_UUID))
       {
         ESP_LOGI(TAG, "Detected model: Pulse 1000");
-        num_probes = 4;
+        num_probes = 2;
         service = PULSE_1000_TEMPERATURE_SERVICE_UUID;
       }
       else if (has_service_(PULSE_2000_TEMPERATURE_SERVICE_UUID))
@@ -214,6 +214,15 @@ namespace esphome
           ESP_LOGD(TAG, "No sensor configured for probe nuber %d. Skipping", i+1);
         }
       }
+      if (service == PULSE_1000_TEMPERATURE_SERVICE_UUID || service == PULSE_2000_TEMPERATURE_SERVICE_UUID)
+      {
+        // Add heating element probes for the Pulse grill if any are configured
+        if (pulse_heating_actual1_ || pulse_heating_actual2_ || pulse_heating_setpoint1_ || pulse_heating_setpoint2_)
+        {
+          this->pulse_element_handle_ = get_handle_(service, PULSE_ELEMENT_UUID);
+          this->value_readers_[this->pulse_element_handle_] = &IGrill::read_pulse_element_;
+        }
+      }
     }
 
     uint16_t IGrill::get_handle_(const char *service, const char *characteristic)
@@ -237,6 +246,22 @@ namespace esphome
     {
 
       this->propane_level_sensor_->publish_state(((float)*raw_value * 25));
+    }
+
+    void IGrill::read_pulse_element_(uint8_t *raw_value, uint16_t value_len)
+    {
+      if (this->pulse_heating_actual1_){
+        this->pulse_heating_actual1_->publish_state(raw_value[0]);
+      }
+      if (this->pulse_heating_actual2_){
+        this->pulse_heating_actual2_->publish_state(raw_value[1]);
+      }
+      if (this->pulse_heating_setpoint1_){
+        this->pulse_heating_setpoint1_->publish_state(raw_value[2]);
+      }
+      if (this->pulse_heating_setpoint2_){
+        this->pulse_heating_setpoint2_->publish_state(raw_value[3]);
+      }
     }
 
     void IGrill::read_temperature_unit_(uint8_t *raw_value, uint16_t value_len)
@@ -414,6 +439,22 @@ namespace esphome
       if (this->propane_level_sensor_ != nullptr)
       {
         LOG_SENSOR("  ", "Propane Level", this->propane_level_sensor_);
+      }
+      if (this->pulse_heating_actual1_ != nullptr)
+      {
+        LOG_SENSOR("  ", "Pulse heating actual 1", this->pulse_heating_actual1_);
+      }
+      if (this->pulse_heating_actual2_ != nullptr)
+      {
+        LOG_SENSOR("  ", "Pulse heating actual 2", this->pulse_heating_actual2_);
+      }
+      if (this->pulse_heating_setpoint1_ != nullptr)
+      {
+        LOG_SENSOR("  ", "Pulse heating setpoint 1", this->pulse_heating_setpoint1_);
+      }
+      if (this->pulse_heating_setpoint2_ != nullptr)
+      {
+        LOG_SENSOR("  ", "Pulse heating setpoint 2", this->pulse_heating_setpoint2_);
       }
     }
 

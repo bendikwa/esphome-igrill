@@ -26,6 +26,10 @@ CONF_TEMPERATURE_PROBE1 = "temperature_probe1"
 CONF_TEMPERATURE_PROBE2 = "temperature_probe2"
 CONF_TEMPERATURE_PROBE3 = "temperature_probe3"
 CONF_TEMPERATURE_PROBE4 = "temperature_probe4"
+CONF_PULSE_ACTUAL1 = "pulse_heating_actual1"
+CONF_PULSE_ACTUAL2 = "pulse_heating_actual2"
+CONF_PULSE_SETPOINT1 = "pulse_heating_setpoint1"
+CONF_PULSE_SETPOINT2 = "pulse_heating_setpoint2"
 
 CONFIG_SCHEMA = cv.All(
     cv.Schema(
@@ -54,6 +58,26 @@ CONFIG_SCHEMA = cv.All(
                 state_class=STATE_CLASS_MEASUREMENT,
             ),
             cv.Optional(CONF_TEMPERATURE_PROBE4): sensor.sensor_schema(
+                accuracy_decimals=2,
+                device_class=DEVICE_CLASS_TEMPERATURE,
+                state_class=STATE_CLASS_MEASUREMENT,
+            ),
+            cv.Optional(CONF_PULSE_ACTUAL1): sensor.sensor_schema(
+                accuracy_decimals=2,
+                device_class=DEVICE_CLASS_TEMPERATURE,
+                state_class=STATE_CLASS_MEASUREMENT,
+            ),
+            cv.Optional(CONF_PULSE_ACTUAL2): sensor.sensor_schema(
+                accuracy_decimals=2,
+                device_class=DEVICE_CLASS_TEMPERATURE,
+                state_class=STATE_CLASS_MEASUREMENT,
+            ),
+            cv.Optional(CONF_PULSE_SETPOINT1): sensor.sensor_schema(
+                accuracy_decimals=2,
+                device_class=DEVICE_CLASS_TEMPERATURE,
+                state_class=STATE_CLASS_MEASUREMENT,
+            ),
+            cv.Optional(CONF_PULSE_SETPOINT2): sensor.sensor_schema(
                 accuracy_decimals=2,
                 device_class=DEVICE_CLASS_TEMPERATURE,
                 state_class=STATE_CLASS_MEASUREMENT,
@@ -94,6 +118,18 @@ async def to_code(config):
     if CONF_TEMPERATURE_PROBE4 in config:
         sens = await sensor.new_sensor(config[CONF_TEMPERATURE_PROBE4])
         cg.add(var.set_temperature_probe(sens, 4))
+    if CONF_PULSE_ACTUAL1 in config:
+        sens = await sensor.new_sensor(config[CONF_PULSE_ACTUAL1])
+        cg.add(var.set_pulse_actual1(sens))
+    if CONF_PULSE_ACTUAL2 in config:
+        sens = await sensor.new_sensor(config[CONF_PULSE_ACTUAL2])
+        cg.add(var.set_pulse_actual2(sens))
+    if CONF_PULSE_SETPOINT1 in config:
+        sens = await sensor.new_sensor(config[CONF_PULSE_SETPOINT1])
+        cg.add(var.set_pulse_setpoint1(sens))
+    if CONF_PULSE_SETPOINT2 in config:
+        sens = await sensor.new_sensor(config[CONF_PULSE_SETPOINT2])
+        cg.add(var.set_pulse_setpoint2(sens))
     if CONF_PROPANE_LEVEL in config:
         sens = await sensor.new_sensor(config[CONF_PROPANE_LEVEL])
         cg.add(var.set_propane(sens))
