@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <iterator>
 #include <map>
+#include <string>
 #include <vector>
 #include "esphome/components/ble_client/ble_client.h"
 #include "esphome/components/esp32_ble_tracker/esp32_ble_tracker.h"

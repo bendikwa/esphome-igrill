@@ -254,16 +254,24 @@ namespace esphome
       ESP_LOGV(TAG, "Sizeof pulse element %d", sizeof(raw_value)/sizeof(raw_value[0]));
       ESP_LOGV(TAG, "Raw temp as text %s", raw_value);
       if (this->pulse_heating_actual1_){
-        this->pulse_heating_actual1_->publish_state(raw_value[0]);
+        std::string actual1;
+        actual1.assign(reinterpret_cast<char*>(raw_value)+1, 3);
+        this->pulse_heating_actual1_->publish_state(stoi(actual1));
       }
       if (this->pulse_heating_actual2_){
-        this->pulse_heating_actual2_->publish_state(raw_value[1]);
+        std::string actual2;
+        actual2.assign(reinterpret_cast<char*>(raw_value)+5, 3);
+        this->pulse_heating_actual2_->publish_state(stoi(actual2));
       }
       if (this->pulse_heating_setpoint1_){
-        this->pulse_heating_setpoint1_->publish_state(raw_value[2]);
+        std::string setpoint1_;
+        setpoint1_.assign(reinterpret_cast<char*>(raw_value)+9, 3);
+        this->pulse_heating_setpoint1_->publish_state(stoi(setpoint1_));
       }
       if (this->pulse_heating_setpoint2_){
-        this->pulse_heating_setpoint2_->publish_state(raw_value[3]);
+        std::string setpoint2_;
+        setpoint2_.assign(reinterpret_cast<char*>(raw_value)+13, 3);
+        this->pulse_heating_setpoint2_->publish_state(stoi(setpoint2_));
       }
     }
 
