@@ -91,9 +91,9 @@ What works:
 - Publishing of probe temperatures
 - Publishing of battery level
 - Publishing of propane level (Untested)
+- Use correct temperature unit (read from device)
 
 TODO:
-- Use correct temperature unit (read from device)
 - Correctly parse and publish Pulse 2000 heating element probes
 - Publish firmware version
 - Read and write temperature setpoint on probes
