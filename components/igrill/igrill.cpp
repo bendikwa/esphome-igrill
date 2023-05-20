@@ -27,7 +27,7 @@ namespace esphome
       {
         if (!is_same_address_(param->connect.remote_bda, this->parent()->get_remote_bda()))
         {
-          ESP_LOGD(TAG, "This ESP_GATTC_CONNECT_EVT is not for me. (remote_bda mismatch");
+          ESP_LOGV(TAG, "This ESP_GATTC_CONNECT_EVT is not for me. (remote_bda mismatch");
           break;
         }
         ESP_LOGD(TAG, "Setting encryption");
@@ -45,7 +45,7 @@ namespace esphome
       {
         if (param->search_cmpl.conn_id != this->parent()->get_conn_id())
         {
-          ESP_LOGD(TAG, "This ESP_GATTC_SEARCH_CMPL_EVT is not for me. (conn_id mismatch");
+          ESP_LOGV(TAG, "This ESP_GATTC_SEARCH_CMPL_EVT is not for me. (conn_id mismatch");
           break;
         }
         // Detect IGrill model and get hadles for the appropriate number of probes.
@@ -53,17 +53,20 @@ namespace esphome
 
         // Get handle for battery level
         this->battery_level_handle_ = get_handle_(BATTERY_SERVICE_UUID, BATTERY_LEVEL_UUID);
+        this->value_readers_[this->battery_level_handle_] = &IGrill::read_battery_;
 
         // Get handle for propane level, if configured
         if (this->propane_level_sensor_ != nullptr)
         {
           this->propane_level_handle_ = get_handle_(PROPANE_LEVEL_SERVICE_UUID, PROPANE_LEVEL);
+          this->value_readers_[this->propane_level_handle_] = &IGrill::read_propane_;
         }
 
         // Get handles for authentication
         this->app_challenge_handle_ = get_handle_(AUTHENTICATION_SERVICE_UUID, APP_CHALLENGE_UUID);
         this->device_response_handle_ = get_handle_(AUTHENTICATION_SERVICE_UUID, DEVICE_RESPONSE_UUID);
         this->device_challenge_handle_ = get_handle_(AUTHENTICATION_SERVICE_UUID, DEVICE_CHALLENGE_UUID);
+        this->value_readers_[this->device_challenge_handle_] = &IGrill::loopback_device_challenge_response_;
 
         ESP_LOGD(TAG, "Starting autheintication process");
         send_authentication_challenge_();
@@ -76,7 +79,7 @@ namespace esphome
       {
         if (param->write.conn_id != this->parent()->get_conn_id())
         {
-          ESP_LOGD(TAG, "This ESP_GATTC_WRITE_CHAR_EVT is not for me. (conn_id mismatch");
+          ESP_LOGV(TAG, "This ESP_GATTC_WRITE_CHAR_EVT is not for me. (conn_id mismatch");
           break;
         }
         if (param->write.status != ESP_GATT_OK)
@@ -102,53 +105,22 @@ namespace esphome
       {
         if (param->read.conn_id != this->parent()->get_conn_id())
         {
-          ESP_LOGD(TAG, "This ESP_GATTC_READ_CHAR_EVT is not for me. (conn_id mismatch");
-          break;
+          ESP_LOGV(TAG, "This ESP_GATTC_READ_CHAR_EVT is not for me. (conn_id mismatch");
         }
-        if (param->read.status != ESP_GATT_OK)
+        else if (param->read.status != ESP_GATT_OK)
         {
           ESP_LOGW(TAG, "Error reading char at handle 0x%x, status=%d", param->read.handle, param->read.status);
-          break;
         }
-        if (param->read.handle == this->battery_level_handle_)
+        else
         {
-          read_battery_(param->read.value, param->read.value_len);
-          break;
-        }
-        else if (param->read.handle == this->propane_level_handle_)
-        {
-          read_propane_(param->read.value, param->read.value_len);
-          break;
-        }
-        else if (param->read.handle == this->probe1_handle_)
-        {
-          read_temperature_(param->read.value, param->read.value_len, 1);
-          break;
-        }
-        else if (param->read.handle == this->probe2_handle_)
-        {
-          read_temperature_(param->read.value, param->read.value_len, 2);
-          break;
-        }
-        else if (param->read.handle == this->probe3_handle_)
-        {
-          read_temperature_(param->read.value, param->read.value_len, 3);
-          break;
-        }
-        else if (param->read.handle == this->probe4_handle_)
-        {
-          read_temperature_(param->read.value, param->read.value_len, 4);
-          break;
-        }
-        else if (param->read.handle == this->temperature_unit_handle_)
-        {
-          read_temperature_unit_(param->read.value, param->read.value_len);
-          break;
-        }
-        else if (param->read.handle == this->device_challenge_handle_)
-        {
-          loopback_device_challenge_response_(param->read.value, param->read.value_len);
-          break;
+          if (value_readers_.count(param->read.handle))
+          {
+            ESP_LOGV(TAG, "Read char event received for handle: 0x%x", param->read.handle);
+            (this->*value_readers_[param->read.handle])(param->read.value, param->read.value_len);
+          }
+          else{
+            ESP_LOGD(TAG, "No read function defined for handle: 0x%x", param->read.handle);
+          }
         }
         break;
       }
@@ -208,8 +180,9 @@ namespace esphome
         ESP_LOGE(TAG, "Could not identify IGrill model");
         return;
       }
-      IGrill::get_temperature_probe_handles_(service);
+      IGrill::add_temperature_probe_handles_(service);
       this->temperature_unit_handle_ = get_handle_(service, TEMPERATURE_UNIT_UUID);
+      this->value_readers_[this->temperature_unit_handle_] = &IGrill::read_temperature_unit_;
     }
 
     bool IGrill::has_service_(const char *service)
@@ -217,18 +190,29 @@ namespace esphome
       auto *srv = this->parent()->get_service(esp32_ble_tracker::ESPBTUUID::from_raw(service));
       if (srv == nullptr)
       {
-        ESP_LOGD(TAG, "No service found at service %s", service);
+        ESP_LOGV(TAG, "No service found at service %s", service);
         return false;
       }
       return true;
     }
 
-    void IGrill::get_temperature_probe_handles_(const char *service)
+    void IGrill::add_temperature_probe_handles_(const char *service)
     {
       std::vector<const char *> probes = {PROBE1_TEMPERATURE, PROBE2_TEMPERATURE, PROBE3_TEMPERATURE, PROBE4_TEMPERATURE};
+      std::vector<void (esphome::igrill::IGrill::*)(uint8_t *, uint16_t)> read_functions = {&IGrill::read_temperature1_, &IGrill::read_temperature2_, &IGrill::read_temperature3_, &IGrill::read_temperature4_};
       for (int i = 0; i < this->num_probes; i++)
       {
-        *this->handles[i] = get_handle_(service, probes[i]);
+        if (this->sensors_[i]) // only add handles for configured sensors
+        {
+          uint16_t probe_handle = get_handle_(service, probes[i]);
+          this->probe_handles_.push_back(probe_handle);
+          this->value_readers_[probe_handle] = read_functions[i];
+          ESP_LOGV(TAG, "Probe nuber %d added with handle 0x%x", i, probe_handle);
+        }
+        else
+        {
+          ESP_LOGD(TAG, "No sensor configured for probe nuber %d. Skipping", i+1);
+        }
       }
     }
 
@@ -266,29 +250,20 @@ namespace esphome
         this->unit_of_measurement_ = CELCIUS_UNIT_STRING;
       }
       ESP_LOGI(TAG, "Setting temperature unit based on device: %s", this->unit_of_measurement_);
-
-      if (this->temperature_probe1_sensor_ != nullptr)
+      for (auto & sensor : this->sensors_)
       {
-        temperature_probe1_sensor_->set_unit_of_measurement(this->unit_of_measurement_);
-      }
-      if (this->temperature_probe2_sensor_ != nullptr)
-      {
-        temperature_probe2_sensor_->set_unit_of_measurement(this->unit_of_measurement_);
-      }
-      if (this->temperature_probe3_sensor_ != nullptr)
-      {
-        temperature_probe3_sensor_->set_unit_of_measurement(this->unit_of_measurement_);
-      }
-      if (this->temperature_probe4_sensor_ != nullptr)
-      {
-        temperature_probe4_sensor_->set_unit_of_measurement(this->unit_of_measurement_);
+        if (sensor)
+        {
+          sensor->set_unit_of_measurement(this->unit_of_measurement_);
+        }
       }
       request_read_values_();
     }
-
+    
     void IGrill::read_temperature_(uint8_t *raw_value, uint16_t value_len, int probe)
     {
       uint16_t raw_temp = (raw_value[1] << 8) | raw_value[0];
+      ESP_LOGV(TAG, "Parsing temperature from probe %d", probe);
       bool probe_unplugged = raw_temp == UNPLUGGED_PROBE_CONSTANT;
       bool publish = true;
       float temp = (float)raw_temp;
@@ -299,27 +274,7 @@ namespace esphome
       }
       if (publish)
       {
-        switch (probe)
-        {
-        case 1:
-          this->temperature_probe1_sensor_->publish_state(temp);
-          break;
-
-        case 2:
-          this->temperature_probe2_sensor_->publish_state(temp);
-          break;
-
-        case 3:
-          this->temperature_probe3_sensor_->publish_state(temp);
-          break;
-
-        case 4:
-          this->temperature_probe4_sensor_->publish_state(temp);
-          break;
-
-        default:
-          break;
-        }
+        this->sensors_[probe]->publish_state(temp);
       }
     }
 
@@ -335,7 +290,7 @@ namespace esphome
         }
         else
         {
-          ESP_LOGD(TAG, "Requesting read of all probe values");
+          ESP_LOGD(TAG, "Requesting read of all values");
           request_read_values_();
         }
         break;
@@ -373,49 +328,57 @@ namespace esphome
 
     void IGrill::request_device_challenge_read_()
     {
-      ESP_LOGD(TAG, "Requesting read of encrypted device response from device");
+      ESP_LOGV(TAG, "Requesting read of encrypted device response from device on handle (0x%x)", this->device_challenge_handle_);
       auto status = esp_ble_gattc_read_char(this->parent()->get_gattc_if(), this->parent()->get_conn_id(), this->device_challenge_handle_, ESP_GATT_AUTH_REQ_NONE);
       if (status)
       {
-        ESP_LOGW(TAG, "Error sending read request for device_challenge, status=%d", status);
+        ESP_LOGW(TAG, "Error sending read request for device_challenge, status=%d, handle=0x%x", status, this->device_challenge_handle_);
       }
     }
 
     void IGrill::request_temp_unit_read_()
     {
+      ESP_LOGV(TAG, "Requesting read of temperature unit on handle (0x%x)", this->temperature_unit_handle_);
       auto status = esp_ble_gattc_read_char(this->parent()->get_gattc_if(), this->parent()->get_conn_id(), this->temperature_unit_handle_, ESP_GATT_AUTH_REQ_NONE);
       if (status)
       {
-        ESP_LOGW(TAG, "Error sending read request for temperature unit, status=%d", status);
+        ESP_LOGW(TAG, "Error sending read request for temperature unit, status=%d, handle=0x%x", status, this->temperature_unit_handle_);
       }
     }
 
     void IGrill::request_read_values_()
     {
+      esp_err_t status = ESP_OK;
       // Read battery level
-      auto status = esp_ble_gattc_read_char(this->parent()->get_gattc_if(), this->parent()->get_conn_id(), this->battery_level_handle_, ESP_GATT_AUTH_REQ_NONE);
-      if (status)
+      if (this->battery_level_sensor_ != nullptr)
       {
-        ESP_LOGW(TAG, "Error sending read request for sensor, status=%d", status);
+        ESP_LOGV(TAG, "Requesting read of battery level on handle (0x%x)", this->battery_level_handle_);
+        status = esp_ble_gattc_read_char(this->parent()->get_gattc_if(), this->parent()->get_conn_id(), this->battery_level_handle_, ESP_GATT_AUTH_REQ_NONE);
+        if (status)
+        {
+          ESP_LOGW(TAG, "Error sending read request for sensor, status=%d, handle=0x%x", status, this->battery_level_handle_);
+        }
       }
 
       // Read temperature probes
-      for (int i = 0; i < this->num_probes; i++)
+      for (auto & probe_handle : probe_handles_)
       {
-        status = esp_ble_gattc_read_char(this->parent()->get_gattc_if(), this->parent()->get_conn_id(), *this->handles[i], ESP_GATT_AUTH_REQ_NONE);
+        ESP_LOGV(TAG, "Requesting read of temperature probe on handle (0x%x)", probe_handle);
+        status = esp_ble_gattc_read_char(this->parent()->get_gattc_if(), this->parent()->get_conn_id(), probe_handle, ESP_GATT_AUTH_REQ_NONE);
         if (status)
         {
-          ESP_LOGW(TAG, "Error sending read request for sensor, status=%d", status);
+          ESP_LOGW(TAG, "Error sending read request for sensor, status=%d, handle=0x%x", status, probe_handle);
         }
       }
 
       // Read propane level
       if (this->propane_level_sensor_ != nullptr)
       {
+        ESP_LOGV(TAG, "Requesting read of propane level on handle (0x%x)", this->propane_level_handle_);
         status = esp_ble_gattc_read_char(this->parent()->get_gattc_if(), this->parent()->get_conn_id(), this->propane_level_handle_, ESP_GATT_AUTH_REQ_NONE);
         if (status)
         {
-          ESP_LOGW(TAG, "Error sending read request for sensor, status=%d", status);
+          ESP_LOGW(TAG, "Error sending read request for sensor, status=%d, handle=0x%x", status, this->propane_level_handle_);
         }
       }
     }
@@ -437,12 +400,21 @@ namespace esphome
 
     void IGrill::dump_config()
     {
-      LOG_SENSOR("  ", "Temperature", this->temperature_probe1_sensor_);
-      LOG_SENSOR("  ", "Temperature", this->temperature_probe2_sensor_);
-      LOG_SENSOR("  ", "Temperature", this->temperature_probe3_sensor_);
-      LOG_SENSOR("  ", "Temperature", this->temperature_probe4_sensor_);
-      LOG_SENSOR("  ", "Battery Level", this->battery_level_sensor_);
-      LOG_SENSOR("  ", "Propane Level", this->propane_level_sensor_);
+      for (auto & element : this->sensors_)
+      {
+        if (element)
+        {
+          LOG_SENSOR("  ", "Temperature", element);
+        }
+      }
+      if (this->battery_level_sensor_ != nullptr)
+      {
+        LOG_SENSOR("  ", "Battery Level", this->battery_level_sensor_);
+      }
+      if (this->propane_level_sensor_ != nullptr)
+      {
+        LOG_SENSOR("  ", "Propane Level", this->propane_level_sensor_);
+      }
     }
 
     IGrill::IGrill()

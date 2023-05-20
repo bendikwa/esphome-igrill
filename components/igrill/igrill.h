@@ -4,6 +4,7 @@
 #include <esp_gattc_api.h>
 #include <algorithm>
 #include <iterator>
+#include <map>
 #include <vector>
 #include "esphome/components/ble_client/ble_client.h"
 #include "esphome/components/esp32_ble_tracker/esp32_ble_tracker.h"
@@ -56,10 +57,7 @@ namespace esphome
       void update() override;
 
       void gattc_event_handler(esp_gattc_cb_event_t event, esp_gatt_if_t gattc_if, esp_ble_gattc_cb_param_t *param) override;
-      void set_temperature_probe1(sensor::Sensor *temperature) { temperature_probe1_sensor_ = temperature; }
-      void set_temperature_probe2(sensor::Sensor *temperature) { temperature_probe2_sensor_ = temperature; }
-      void set_temperature_probe3(sensor::Sensor *temperature) { temperature_probe3_sensor_ = temperature; }
-      void set_temperature_probe4(sensor::Sensor *temperature) { temperature_probe4_sensor_ = temperature; }
+      void set_temperature_probe(sensor::Sensor *temperature, int probe_num) { sensors_[probe_num-1] = temperature; }
       void set_propane(sensor::Sensor *propane) { propane_level_sensor_ = propane; }
       void set_battery(sensor::Sensor *battery) { battery_level_sensor_ = battery; }
       void set_send_value_when_unplugged(bool send_value_when_unplugged) { ESP_LOGE("igrill", "send_value_when_unplugged: %d", send_value_when_unplugged); send_value_when_unplugged_ = send_value_when_unplugged; }
@@ -69,11 +67,15 @@ namespace esphome
       void detect_and_init_igrill_model_();
       bool has_service_(const char *service);
       bool is_same_address_(uint8_t *a, uint8_t *b);
-      void get_temperature_probe_handles_(const char *service);
+      void add_temperature_probe_handles_(const char *service);
       uint16_t get_handle_(const char *service, const char *chr);
       void read_battery_(uint8_t *value, uint16_t value_len);
       void read_temperature_unit_(uint8_t *value, uint16_t value_len);
       void read_propane_(uint8_t *value, uint16_t value_len);
+      void read_temperature1_(uint8_t *value, uint16_t value_len){ read_temperature_(value, value_len, 0); }
+      void read_temperature2_(uint8_t *value, uint16_t value_len){ read_temperature_(value, value_len, 1); }
+      void read_temperature3_(uint8_t *value, uint16_t value_len){ read_temperature_(value, value_len, 2); }
+      void read_temperature4_(uint8_t *value, uint16_t value_len){ read_temperature_(value, value_len, 3); }
       void read_temperature_(uint8_t *value, uint16_t value_len, int probe);
       void request_read_values_();
       void request_temp_unit_read_();
@@ -85,25 +87,19 @@ namespace esphome
       bool send_value_when_unplugged_;
       float unplugged_probe_value_;
       const char *unit_of_measurement_{nullptr};
-
-      sensor::Sensor *temperature_probe1_sensor_{nullptr};
-      sensor::Sensor *temperature_probe2_sensor_{nullptr};
-      sensor::Sensor *temperature_probe3_sensor_{nullptr};
-      sensor::Sensor *temperature_probe4_sensor_{nullptr};
+      
+      std::vector<sensor::Sensor *> sensors_ = {nullptr, nullptr, nullptr, nullptr};
       sensor::Sensor *battery_level_sensor_{nullptr};
       sensor::Sensor *propane_level_sensor_{nullptr};
 
       uint16_t app_challenge_handle_;
+      uint16_t battery_level_handle_;
       uint16_t device_challenge_handle_;
       uint16_t device_response_handle_;
-      uint16_t temperature_unit_handle_;
-      uint16_t probe1_handle_;
-      uint16_t probe2_handle_;
-      uint16_t probe3_handle_;
-      uint16_t probe4_handle_;
+      std::vector<uint16_t> probe_handles_;
       uint16_t propane_level_handle_;
-      std::vector<uint16_t *> handles = {&probe1_handle_, &probe2_handle_, &probe3_handle_, &probe4_handle_};
-      uint16_t battery_level_handle_;
+      std::map<uint16_t, void (esphome::igrill::IGrill::*)(uint8_t *, uint16_t)> value_readers_;
+      uint16_t temperature_unit_handle_;
     };
 
   } // namespace igrill
