@@ -73,13 +73,7 @@ sensor:
 - **unplugged_probe_value** (*Optional,* integer): The value to publish when a probe is disconnected, and **send_value_when_unplugged** is `true`. Defaults to 0
 
 ## Temperature unit:
-For now, the component can not detect the correct temperature unit automatically. The default is Celcius, if your IGrill reports it in Fahrenheit, you need add configuration for it on all probes like this:
-
-```yaml
-    temperature_probeX:
-      name: "IGrill probe X"
-      unit_of_measurement: "°F"
-```
+The temperature unit of the sensors are set to the unit reported by the iGrill device
 
 ## Troubleshooting
 
