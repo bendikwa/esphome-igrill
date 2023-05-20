@@ -389,7 +389,7 @@ namespace esphome
       {
         if (a[i] != b[i])
         {
-          ESP_LOGD(TAG, "Addresses do not match a: %02X:%02X:%02X:%02X:%02X:%02X b: %02X:%02X:%02X:%02X:%02X:%02X",
+          ESP_LOGV(TAG, "Addresses do not match a: %02X:%02X:%02X:%02X:%02X:%02X b: %02X:%02X:%02X:%02X:%02X:%02X",
                    a[0], a[1], a[2], a[3], a[4], a[5], b[0], b[1], b[2], b[3], b[4], b[5]);
           return false;
         }
