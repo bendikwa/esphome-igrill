@@ -219,7 +219,7 @@ namespace esphome
         // Add heating element probes for the Pulse grill if any are configured
         if (pulse_heating_actual1_ || pulse_heating_actual2_ || pulse_heating_setpoint1_ || pulse_heating_setpoint2_)
         {
-          this->pulse_element_handle_ = get_handle_(service, PULSE_ELEMENT_UUID);
+          this->pulse_element_handle_ = get_handle_(PULSE_ELEMENT_SERVICE_UUID, PULSE_ELEMENT_UUID);
           this->value_readers_[this->pulse_element_handle_] = &IGrill::read_pulse_element_;
         }
       }

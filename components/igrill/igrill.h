@@ -29,6 +29,7 @@ namespace esphome
     static const char *const IGRILLV3_TEMPERATURE_SERVICE_UUID = "6E910000-58DC-41C7-943F-518B278CEA88";
     static const char *const PULSE_1000_TEMPERATURE_SERVICE_UUID = "7E920000-68DC-41C7-943F-518B278CEA87";
     static const char *const PULSE_2000_TEMPERATURE_SERVICE_UUID = "7E920000-68DC-41C7-943F-518B278CEA88";
+    static const char *const PULSE_ELEMENT_SERVICE_UUID = "6c910000-58dc-41c7-943f-518b278ceaaa";
     static const char *const TEMPERATURE_UNIT_UUID = "06ef0001-2e06-4b79-9e33-fce2c42805ec";
     static const char *const PROBE1_TEMPERATURE = "06ef0002-2e06-4b79-9e33-fce2c42805ec";
     static const char *const PROBE2_TEMPERATURE = "06ef0004-2e06-4b79-9e33-fce2c42805ec";
