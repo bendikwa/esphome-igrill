@@ -328,7 +328,7 @@ namespace esphome
 
     void IGrill::request_device_challenge_read_()
     {
-      ESP_LOGD(TAG, "Requesting read of encrypted device response from device on handle (0x%x)", this->device_challenge_handle_);
+      ESP_LOGV(TAG, "Requesting read of encrypted device response from device on handle (0x%x)", this->device_challenge_handle_);
       auto status = esp_ble_gattc_read_char(this->parent()->get_gattc_if(), this->parent()->get_conn_id(), this->device_challenge_handle_, ESP_GATT_AUTH_REQ_NONE);
       if (status)
       {
@@ -338,7 +338,7 @@ namespace esphome
 
     void IGrill::request_temp_unit_read_()
     {
-      ESP_LOGD(TAG, "Requesting read of temperature unit on handle (0x%x)", this->temperature_unit_handle_);
+      ESP_LOGV(TAG, "Requesting read of temperature unit on handle (0x%x)", this->temperature_unit_handle_);
       auto status = esp_ble_gattc_read_char(this->parent()->get_gattc_if(), this->parent()->get_conn_id(), this->temperature_unit_handle_, ESP_GATT_AUTH_REQ_NONE);
       if (status)
       {
