@@ -250,6 +250,10 @@ namespace esphome
 
     void IGrill::read_pulse_element_(uint8_t *raw_value, uint16_t value_len)
     {
+      ESP_LOGV(TAG, "Parsing part 1 of temperature from pulse element as hex 0x%x", raw_value[0]);
+      ESP_LOGV(TAG, "Parsing part 2 of temperature from pulse element as hex 0x%x", raw_value[1]);
+      ESP_LOGV(TAG, "Parsing part 3 of temperature from pulse element as hex 0x%x", raw_value[2]);
+      ESP_LOGV(TAG, "Parsing part 4 of temperature from pulse element as hex 0x%x", raw_value[3]);
       if (this->pulse_heating_actual1_){
         this->pulse_heating_actual1_->publish_state(raw_value[0]);
       }
