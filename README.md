@@ -9,7 +9,7 @@ To use this component, include it as an [External component](https://esphome.io/
 
 ```yaml
 external_components:
-  - source: github://bendikwa/esphome-igrill@v1.0
+  - source: github://bendikwa/esphome-igrill@v1.2
 ```
 
 ## Device discovery
@@ -40,7 +40,7 @@ In principle, all IGrill devices, including the Pulse 2000 are supported, but I 
 - [X] IGrill V202
 - [x] IGrill V3
 - [ ] Weber Pulse 1000
-- [x] Weber Pulse 2000
+- [x] Weber Pulse 2000 Thanks to [PaulAntonDeen](https://github.com/PaulAntonDeen) for testing and verifying
 
 
 If you own one of the untested models, I would be thankfull if you create a ticket so we can get it confirmed working.
@@ -83,18 +83,12 @@ sensor:
 - **pulse_heating_actual2** (*Optional) The reported temperature of the right heating element on a Pulse 2000
 - **pulse_heating_setpoint1** (*Optional) The reported setpoint of the left heating element on a Pulse 2000
 - **pulse_heating_setpoint2** (*Optional) The reported setpoint of the right heating element on a Pulse 2000
-- **propane_level** (*Optional) The propane level
+- **propane_level** (*Optional) The propane level on a V3 device
 - **battery_level** (*Optional) The battery level of the igrill device
 
 
 ## Temperature unit:
-For now, the component can not detect the correct temperature unit automatically. The default is Celcius, if your IGrill reports it in Fahrenheit, you need add configuration for it on all probes like this:
-
-```yaml
-    temperature_probeX:
-      name: "IGrill probe X"
-      unit_of_measurement: "°F"
-```
+The temperature unit of the sensors are set to the unit reported by the iGrill device
 
 ## Troubleshooting
 
@@ -120,9 +114,9 @@ What works:
 - Publishing of Pulse 2000 heating element values
 - Publishing of battery level
 - Publishing of propane level (Untested)
+- Use correct temperature unit (read from device)
 
 TODO:
-- Use correct temperature unit (read from device)
 - Publish firmware version
 - Read and write temperature setpoint on probes
 - Set temperature unit (write to device)

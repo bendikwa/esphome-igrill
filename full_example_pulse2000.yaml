@@ -1,0 +1,54 @@
+esphome:
+  name: igrill
+
+esp32:
+  board: esp32dev
+  framework:
+    type: arduino
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+  encryption:
+    key: !secret encryption_key
+
+ota:
+  password: !secret ota_password
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+
+external_components:
+  - source: github://bendikwa/esphome-igrill@v1.2
+
+esp32_ble_tracker:
+
+ble_client:
+  - mac_address: 70:91:8F:XX:XX:XX
+    id: igrill_device
+
+sensor:
+  - platform: igrill
+    ble_client_id: igrill_device
+    update_interval: 30s # default
+    send_value_when_unplugged: true # default
+    unplugged_probe_value: 0 # default
+    temperature_probe1:
+      name: "Weber Pulse 2000 temp 1"
+    temperature_probe2:
+      name: "Weber Pulse 2000 temp 2"
+    temperature_probe3:
+      name: "Weber Pulse 2000 temp 3"
+    temperature_probe4:
+      name: "Weber Pulse 2000 temp 4"
+    pulse_heating_actual1:
+      name: "Weber Pulse 2000 Left temp"
+    pulse_heating_actual2:
+      name: "Weber Pulse 2000 Right temp"
+    pulse_heating_setpoint1:
+      name: "Weber Pulse 2000 Left setpoint"
+    pulse_heating_setpoint2:
+      name: "Weber Pulse 2000 Right setpoint"
