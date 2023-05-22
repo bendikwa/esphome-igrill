@@ -39,12 +39,12 @@ sensor:
     battery_level:
       name: "IGrill v3 battery"
     temperature_probe1:
-      name: "IGrill v3 temp 1"
+      name: "IGrill v3 temp probe 1"
     temperature_probe2:
-      name: "IGrill v3 temp 2"
+      name: "IGrill v3 temp probe 2"
     temperature_probe3:
-      name: "IGrill v3 temp 3"
+      name: "IGrill v3 temp probe 3"
     temperature_probe4:
-      name: "IGrill v3 temp 4"
+      name: "IGrill v3 temp probe 4"
     propane_level:
-      name: "IGrill v3 Propane"
+      name: "IGrill v3 Propane level"

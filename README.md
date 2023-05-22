@@ -52,22 +52,22 @@ esp32_ble_tracker:
 
 ble_client:
   - mac_address: 70:91:8F:XX:XX:XX
-    id: igrillv3
+    id: igrill_device
 
 sensor:
   - platform: igrill
-    ble_client_id: igrillv3
+    ble_client_id: igrill_device
     update_interval: 30s # default
     battery_level:
       name: "IGrill v3 battery"
     temperature_probe1:
-      name: "IGrill v3 temp 1"
+      name: "IGrill v3 temp probe 1"
     temperature_probe2:
-      name: "IGrill v3 temp 2"
+      name: "IGrill v3 temp probe 2"
     temperature_probe3:
-      name: "IGrill v3 temp 3"
+      name: "IGrill v3 temp probe 3"
     temperature_probe4:
-      name: "IGrill v3 temp 4"
+      name: "IGrill v3 temp probe 4"
 ```
 ## Configuration variables
 - **update_interval** (*Optional,* [Time](https://esphome.io/guides/configuration-types.html#config-time)) The interval between each read and publish of sensor values. Defaults to "30s"
@@ -79,7 +79,7 @@ sensor:
 - **temperature_probe2** (*Optional) The reported temperature of probe 2
 - **temperature_probe3** (*Optional) The reported temperature of probe 3
 - **temperature_probe4** (*Optional) The reported temperature of probe 4
-- **pulse_heating_actual1** (*Optional) The reported temperature of the left heating element on a Pulse 2000 
+- **pulse_heating_actual1** (*Optional) The reported temperature of the left heating element on a Pulse 2000
 - **pulse_heating_actual2** (*Optional) The reported temperature of the right heating element on a Pulse 2000
 - **pulse_heating_setpoint1** (*Optional) The reported setpoint of the left heating element on a Pulse 2000
 - **pulse_heating_setpoint2** (*Optional) The reported setpoint of the right heating element on a Pulse 2000

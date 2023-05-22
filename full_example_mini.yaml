@@ -39,4 +39,4 @@ sensor:
     battery_level:
       name: "IGrill Mini battery"
     temperature_probe1:
-      name: "IGrill Mini temp"
+      name: "IGrill Mini temp probe"

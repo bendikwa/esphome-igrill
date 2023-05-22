@@ -37,13 +37,13 @@ sensor:
     send_value_when_unplugged: true # default
     unplugged_probe_value: 0 # default
     temperature_probe1:
-      name: "Weber Pulse 2000 temp 1"
+      name: "Weber Pulse 2000 temp probe 1"
     temperature_probe2:
-      name: "Weber Pulse 2000 temp 2"
+      name: "Weber Pulse 2000 temp probe 2"
     temperature_probe3:
-      name: "Weber Pulse 2000 temp 3"
+      name: "Weber Pulse 2000 temp probe 3"
     temperature_probe4:
-      name: "Weber Pulse 2000 temp 4"
+      name: "Weber Pulse 2000 temp probe 4"
     pulse_heating_actual1:
       name: "Weber Pulse 2000 Left temp"
     pulse_heating_actual2:
