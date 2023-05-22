@@ -48,3 +48,7 @@ sensor:
       name: "IGrill v3 temp 4"
     propane_level:
       name: "IGrill v3 Propane"
+ 
+ binary_sensor:
+  - platform: status
+    name: "iGrill Adapter Status"
