@@ -29,6 +29,16 @@ esp32_ble_tracker:
 ble_client:
   - mac_address: 70:91:8F:XX:XX:XX
     id: igrill_device
+    on_connect:
+      then:
+        - binary_sensor.template.publish:
+            id: v3_connection_bin
+            state: ON
+    on_disconnect:
+      then:
+        - binary_sensor.template.publish:
+            id: v3_connection_bin
+            state: OFF
 
 sensor:
   - platform: igrill
@@ -50,5 +60,8 @@ sensor:
       name: "IGrill v3 Propane"
  
  binary_sensor:
-  - platform: status
-    name: "iGrill Adapter Status"
+  - platform: template
+    name: "iGrill v3 connection status"
+    id: v3_connection_bin
+    device_class: connectivity
+    entity_category: diagnostic
