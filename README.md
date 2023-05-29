@@ -29,7 +29,8 @@ The device will then listen for nearby devices, and display a message like this 
 [I][igrill_ble_listener:029]: Found IGrill device Name: iGrill_mini (MAC: 70:91:8F:XX:XX:XX)
 ```
 
-Once the device is found, remove the igrill_ble_listener device tracker from your configuration and take note of the device MAC address, and use it when configuring a sensor below.
+Once the device is found, take note of the device MAC address. You will use it when configuring a sensor below.
+You can now remove the `igrill_ble_listener` device tracker from your configuration.
 
 ## Supported Devices
 In principle, all IGrill devices, including the Pulse 2000 are supported, but I do not own all of them. The ones with a checkmark in the list are confirmed working IGrill models:
@@ -74,7 +75,7 @@ sensor:
 - **send_value_when_unplugged** (*Optional,* boolean): When set to `false`, the component will skip publishing for probes that are unplugged. Defaults to `true`
 - **unplugged_probe_value** (*Optional,* integer): The value to publish when a probe is disconnected, and **send_value_when_unplugged** is `true`. Defaults to 0
 
-## Sensor options
+## Available Sensors
 - **temperature_probe1** (*Optional) The reported temperature of probe 1
 - **temperature_probe2** (*Optional) The reported temperature of probe 2
 - **temperature_probe3** (*Optional) The reported temperature of probe 3
@@ -85,9 +86,6 @@ sensor:
 - **pulse_heating_setpoint2** (*Optional) The reported setpoint of the right heating element on a Pulse 2000
 - **propane_level** (*Optional) The propane level on a V3 device
 - **battery_level** (*Optional) The battery level of the igrill device
-
-## Temperature unit:
-The temperature unit of the sensors are set to the unit reported by the iGrill device
 
 ## Additional diagnostic connection sensors
 If you require HA sensors to indicate if a BT connection to the iGrill device is established (e.g. for conditional cards), you can use the automations included in `ble_client` to update a template binary sensor like this:
@@ -132,7 +130,7 @@ logger:
 ```
 
 ## Disclaimer
-This is a work in progress, and there is a number of things that do not work yet.
+This is a work in progress, and some things do not work yet.
 
 What works:
 - MAC address discovery with `igrill_ble_listener`
