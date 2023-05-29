@@ -28,11 +28,21 @@ esp32_ble_tracker:
 
 ble_client:
   - mac_address: 70:91:8F:XX:XX:XX
-    id: igrill_device
+    id: igrill_v3
+    on_connect:
+      then:
+        - binary_sensor.template.publish:
+            id: v3_connection_bin
+            state: ON
+    on_disconnect:
+      then:
+        - binary_sensor.template.publish:
+            id: v3_connection_bin
+            state: OFF
 
 sensor:
   - platform: igrill
-    ble_client_id: igrill_device
+    ble_client_id: igrill_v3
     update_interval: 30s # default
     send_value_when_unplugged: true # default
     unplugged_probe_value: 0 # default
@@ -48,3 +58,10 @@ sensor:
       name: "IGrill v3 temp probe 4"
     propane_level:
       name: "IGrill v3 Propane level"
+ 
+ binary_sensor:
+  - platform: template
+    name: "iGrill v3 connection status"
+    id: v3_connection_bin
+    device_class: connectivity
+    entity_category: diagnostic

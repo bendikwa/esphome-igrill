@@ -28,11 +28,21 @@ esp32_ble_tracker:
 
 ble_client:
   - mac_address: 70:91:8F:XX:XX:XX
-    id: igrill_device
+    id: igrill_pulse2k
+    on_connect:
+      then:
+        - binary_sensor.template.publish:
+            id: pulse2k_connection_bin
+            state: ON
+    on_disconnect:
+      then:
+        - binary_sensor.template.publish:
+            id: pulse2k_connection_bin
+            state: OFF
 
 sensor:
   - platform: igrill
-    ble_client_id: igrill_device
+    ble_client_id: igrill_pulse2k
     update_interval: 30s # default
     send_value_when_unplugged: true # default
     unplugged_probe_value: 0 # default
@@ -52,3 +62,10 @@ sensor:
       name: "Weber Pulse 2000 Left setpoint"
     pulse_heating_setpoint2:
       name: "Weber Pulse 2000 Right setpoint"
+ 
+ binary_sensor:
+  - platform: template
+    name: "iGrill Pulse 2000 connection status"
+    id: pulse2k_connection_bin
+    device_class: connectivity
+    entity_category: diagnostic
