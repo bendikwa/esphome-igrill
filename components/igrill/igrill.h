@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <iterator>
 #include <map>
+#include <string>
 #include <vector>
 #include "esphome/components/ble_client/ble_client.h"
 #include "esphome/components/esp32_ble_tracker/esp32_ble_tracker.h"
@@ -29,13 +30,13 @@ namespace esphome
     static const char *const IGRILLV3_TEMPERATURE_SERVICE_UUID = "6E910000-58DC-41C7-943F-518B278CEA88";
     static const char *const PULSE_1000_TEMPERATURE_SERVICE_UUID = "7E920000-68DC-41C7-943F-518B278CEA87";
     static const char *const PULSE_2000_TEMPERATURE_SERVICE_UUID = "7E920000-68DC-41C7-943F-518B278CEA88";
+    static const char *const PULSE_ELEMENT_SERVICE_UUID = "6c910000-58dc-41c7-943f-518b278ceaaa";
     static const char *const TEMPERATURE_UNIT_UUID = "06ef0001-2e06-4b79-9e33-fce2c42805ec";
     static const char *const PROBE1_TEMPERATURE = "06ef0002-2e06-4b79-9e33-fce2c42805ec";
     static const char *const PROBE2_TEMPERATURE = "06ef0004-2e06-4b79-9e33-fce2c42805ec";
     static const char *const PROBE3_TEMPERATURE = "06ef0006-2e06-4b79-9e33-fce2c42805ec";
     static const char *const PROBE4_TEMPERATURE = "06ef0008-2e06-4b79-9e33-fce2c42805ec";
-
-    static const char *const HEATING_ELEMENT = "6c91000a-58dc-41c7-943f-518b278ceaaa";
+    static const char *const PULSE_ELEMENT_UUID = "6c91000a-58dc-41c7-943f-518b278ceaaa";
     
     static const char *const PROPANE_LEVEL_SERVICE_UUID = "F5D40000-3548-4C22-9947-F3673FCE3CD9";
     static const char *const PROPANE_LEVEL = "f5d40001-3548-4c22-9947-f3673fce3cd9";
@@ -58,6 +59,10 @@ namespace esphome
 
       void gattc_event_handler(esp_gattc_cb_event_t event, esp_gatt_if_t gattc_if, esp_ble_gattc_cb_param_t *param) override;
       void set_temperature_probe(sensor::Sensor *temperature, int probe_num) { sensors_[probe_num-1] = temperature; }
+      void set_pulse_actual1(sensor::Sensor *pulse_actual) { pulse_heating_actual1_ = pulse_actual; }
+      void set_pulse_actual2(sensor::Sensor *pulse_actual) { pulse_heating_actual2_ = pulse_actual; }
+      void set_pulse_setpoint1(sensor::Sensor *pulse_setpoint) { pulse_heating_setpoint1_ = pulse_setpoint; }
+      void set_pulse_setpoint2(sensor::Sensor *pulse_setpoint) { pulse_heating_setpoint2_ = pulse_setpoint; }
       void set_propane(sensor::Sensor *propane) { propane_level_sensor_ = propane; }
       void set_battery(sensor::Sensor *battery) { battery_level_sensor_ = battery; }
       void set_send_value_when_unplugged(bool send_value_when_unplugged) { ESP_LOGE("igrill", "send_value_when_unplugged: %d", send_value_when_unplugged); send_value_when_unplugged_ = send_value_when_unplugged; }
@@ -72,6 +77,7 @@ namespace esphome
       void read_battery_(uint8_t *value, uint16_t value_len);
       void read_temperature_unit_(uint8_t *value, uint16_t value_len);
       void read_propane_(uint8_t *value, uint16_t value_len);
+      void read_pulse_element_(uint8_t *value, uint16_t value_len);
       void read_temperature1_(uint8_t *value, uint16_t value_len){ read_temperature_(value, value_len, 0); }
       void read_temperature2_(uint8_t *value, uint16_t value_len){ read_temperature_(value, value_len, 1); }
       void read_temperature3_(uint8_t *value, uint16_t value_len){ read_temperature_(value, value_len, 2); }
@@ -91,6 +97,10 @@ namespace esphome
       std::vector<sensor::Sensor *> sensors_ = {nullptr, nullptr, nullptr, nullptr};
       sensor::Sensor *battery_level_sensor_{nullptr};
       sensor::Sensor *propane_level_sensor_{nullptr};
+      sensor::Sensor *pulse_heating_actual1_{nullptr};
+      sensor::Sensor *pulse_heating_actual2_{nullptr};
+      sensor::Sensor *pulse_heating_setpoint1_{nullptr};
+      sensor::Sensor *pulse_heating_setpoint2_{nullptr};
 
       uint16_t app_challenge_handle_;
       uint16_t battery_level_handle_;
@@ -98,6 +108,7 @@ namespace esphome
       uint16_t device_response_handle_;
       std::vector<uint16_t> probe_handles_;
       uint16_t propane_level_handle_;
+      uint16_t pulse_element_handle_;
       std::map<uint16_t, void (esphome::igrill::IGrill::*)(uint8_t *, uint16_t)> value_readers_;
       uint16_t temperature_unit_handle_;
     };

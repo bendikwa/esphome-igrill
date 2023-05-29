@@ -166,7 +166,7 @@ namespace esphome
       else if (has_service_(PULSE_1000_TEMPERATURE_SERVICE_UUID))
       {
         ESP_LOGI(TAG, "Detected model: Pulse 1000");
-        num_probes = 4;
+        num_probes = 2;
         service = PULSE_1000_TEMPERATURE_SERVICE_UUID;
       }
       else if (has_service_(PULSE_2000_TEMPERATURE_SERVICE_UUID))
@@ -214,6 +214,15 @@ namespace esphome
           ESP_LOGD(TAG, "No sensor configured for probe nuber %d. Skipping", i+1);
         }
       }
+      if (service == PULSE_1000_TEMPERATURE_SERVICE_UUID || service == PULSE_2000_TEMPERATURE_SERVICE_UUID)
+      {
+        // Add heating element probes for the Pulse grill if any are configured
+        if (pulse_heating_actual1_ || pulse_heating_actual2_ || pulse_heating_setpoint1_ || pulse_heating_setpoint2_)
+        {
+          this->pulse_element_handle_ = get_handle_(PULSE_ELEMENT_SERVICE_UUID, PULSE_ELEMENT_UUID);
+          this->value_readers_[this->pulse_element_handle_] = &IGrill::read_pulse_element_;
+        }
+      }
     }
 
     uint16_t IGrill::get_handle_(const char *service, const char *characteristic)
@@ -237,6 +246,34 @@ namespace esphome
     {
 
       this->propane_level_sensor_->publish_state(((float)*raw_value * 25));
+    }
+
+    void IGrill::read_pulse_element_(uint8_t *raw_value, uint16_t value_len)
+    {
+      if (this->pulse_heating_actual1_){
+        std::string actual1;
+        actual1.assign(reinterpret_cast<char*>(raw_value)+1, 3);
+        ESP_LOGV(TAG, "Parsed actual1 form pulse element data %s", actual1);
+        this->pulse_heating_actual1_->publish_state(stoi(actual1));
+      }
+      if (this->pulse_heating_actual2_){
+        std::string actual2;
+        actual2.assign(reinterpret_cast<char*>(raw_value)+5, 3);
+        ESP_LOGV(TAG, "Parsed actual2 form pulse element data %s", actual2);
+        this->pulse_heating_actual2_->publish_state(stoi(actual2));
+      }
+      if (this->pulse_heating_setpoint1_){
+        std::string setpoint1_;
+        setpoint1_.assign(reinterpret_cast<char*>(raw_value)+9, 3);
+        ESP_LOGV(TAG, "Parsed setpoint1 form pulse element data %s", setpoint1_);
+        this->pulse_heating_setpoint1_->publish_state(stoi(setpoint1_));
+      }
+      if (this->pulse_heating_setpoint2_){
+        std::string setpoint2_;
+        setpoint2_.assign(reinterpret_cast<char*>(raw_value)+13, 3);
+        ESP_LOGV(TAG, "Parsed setpoint2 form pulse element data %s", setpoint2_);
+        this->pulse_heating_setpoint2_->publish_state(stoi(setpoint2_));
+      }
     }
 
     void IGrill::read_temperature_unit_(uint8_t *raw_value, uint16_t value_len)
@@ -381,6 +418,17 @@ namespace esphome
           ESP_LOGW(TAG, "Error sending read request for sensor, status=%d, handle=0x%x", status, this->propane_level_handle_);
         }
       }
+
+      // Read pulse element
+      if (pulse_heating_actual1_ || pulse_heating_actual2_ || pulse_heating_setpoint1_ || pulse_heating_setpoint2_)
+      {
+        ESP_LOGV(TAG, "Requesting read of pulse element on handle (0x%x)", this->pulse_element_handle_);
+        status = esp_ble_gattc_read_char(this->parent()->get_gattc_if(), this->parent()->get_conn_id(), this->pulse_element_handle_, ESP_GATT_AUTH_REQ_NONE);
+        if (status)
+        {
+          ESP_LOGW(TAG, "Error sending read request for sensor, status=%d, handle=0x%x", status, this->pulse_element_handle_);
+        }
+      }
     }
 
     bool IGrill::is_same_address_(uint8_t *a, uint8_t *b)
@@ -414,6 +462,22 @@ namespace esphome
       if (this->propane_level_sensor_ != nullptr)
       {
         LOG_SENSOR("  ", "Propane Level", this->propane_level_sensor_);
+      }
+      if (this->pulse_heating_actual1_ != nullptr)
+      {
+        LOG_SENSOR("  ", "Pulse heating actual 1", this->pulse_heating_actual1_);
+      }
+      if (this->pulse_heating_actual2_ != nullptr)
+      {
+        LOG_SENSOR("  ", "Pulse heating actual 2", this->pulse_heating_actual2_);
+      }
+      if (this->pulse_heating_setpoint1_ != nullptr)
+      {
+        LOG_SENSOR("  ", "Pulse heating setpoint 1", this->pulse_heating_setpoint1_);
+      }
+      if (this->pulse_heating_setpoint2_ != nullptr)
+      {
+        LOG_SENSOR("  ", "Pulse heating setpoint 2", this->pulse_heating_setpoint2_);
       }
     }
 

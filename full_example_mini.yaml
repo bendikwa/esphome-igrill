@@ -1,0 +1,59 @@
+esphome:
+  name: igrill
+
+esp32:
+  board: esp32dev
+  framework:
+    type: arduino
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+  encryption:
+    key: !secret encryption_key
+
+ota:
+  password: !secret ota_password
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+
+external_components:
+  - source: github://bendikwa/esphome-igrill@v1.2
+
+esp32_ble_tracker:
+
+ble_client:
+  - mac_address: 70:91:8F:XX:XX:XX
+    id: igrill_mini
+    on_connect:
+      then:
+        - binary_sensor.template.publish:
+            id: mini_connection_bin
+            state: ON
+    on_disconnect:
+      then:
+        - binary_sensor.template.publish:
+            id: mini_connection_bin
+            state: OFF
+
+sensor:
+  - platform: igrill
+    ble_client_id: igrill_mini
+    update_interval: 30s # default
+    send_value_when_unplugged: true # default
+    unplugged_probe_value: 0 # default
+    battery_level:
+      name: "IGrill Mini battery"
+    temperature_probe1:
+      name: "IGrill Mini temp probe"
+
+ binary_sensor:
+  - platform: template
+    name: "iGrill mini connection status"
+    id: mini_connection_bin
+    device_class: connectivity
+    entity_category: diagnostic

@@ -22,13 +22,13 @@ wifi:
   password: !secret wifi_password
 
 external_components:
-  - source: github://bendikwa/esphome-igrill@v1.0
+  - source: github://bendikwa/esphome-igrill@v1.2
 
 esp32_ble_tracker:
 
 ble_client:
   - mac_address: 70:91:8F:XX:XX:XX
-    id: igrill_device
+    id: igrill_v3
     on_connect:
       then:
         - binary_sensor.template.publish:
@@ -42,22 +42,22 @@ ble_client:
 
 sensor:
   - platform: igrill
-    ble_client_id: igrill_device
+    ble_client_id: igrill_v3
     update_interval: 30s # default
     send_value_when_unplugged: true # default
     unplugged_probe_value: 0 # default
     battery_level:
       name: "IGrill v3 battery"
     temperature_probe1:
-      name: "IGrill v3 temp 1"
+      name: "IGrill v3 temp probe 1"
     temperature_probe2:
-      name: "IGrill v3 temp 2"
+      name: "IGrill v3 temp probe 2"
     temperature_probe3:
-      name: "IGrill v3 temp 3"
+      name: "IGrill v3 temp probe 3"
     temperature_probe4:
-      name: "IGrill v3 temp 4"
+      name: "IGrill v3 temp probe 4"
     propane_level:
-      name: "IGrill v3 Propane"
+      name: "IGrill v3 Propane level"
  
  binary_sensor:
   - platform: template
