@@ -86,6 +86,34 @@ sensor:
 - **propane_level** (*Optional) The propane level on a V3 device
 - **battery_level** (*Optional) The battery level of the igrill device
 
+## Temperature unit:
+The temperature unit of the sensors are set to the unit reported by the iGrill device
+
+## Additional diagnostic connection sensors
+If you require HA sensors to indicate if a BT connection to the iGrill device is established (e.g. for conditional cards), you can use the automations included in `ble_client` to update a template binary sensor like this:
+
+```yaml
+ble_client:
+  - mac_address: 70:91:8F:XX:XX:XX
+    id: igrillv3
+    on_connect:
+      then:
+        - binary_sensor.template.publish:
+            id: v3_connection_bin
+            state: ON
+    on_disconnect:
+      then:
+        - binary_sensor.template.publish:
+            id: v3_connection_bin
+            state: OFF
+
+binary_sensor:
+  - platform: template
+    name: "iGrill V3 connection status"
+    id: v3_connection_bin
+    device_class: connectivity
+    entity_category: diagnostic
+```
 
 ## Temperature unit:
 The temperature unit of the sensors are set to the unit reported by the iGrill device
