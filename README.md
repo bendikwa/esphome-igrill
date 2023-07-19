@@ -40,7 +40,7 @@ In principle, all IGrill devices, including the Pulse 2000 are supported, but I 
 - [x] IGrill V2 - Thanks to [stogs](https://github.com/stogs) for verifying
 - [X] IGrill V202
 - [x] IGrill V3
-- [ ] Weber Pulse 1000
+- [x] Weber Pulse 1000 Thanks to [samvanh](https://github.com/samvanh) for verifying
 - [x] Weber Pulse 2000 Thanks to [PaulAntonDeen](https://github.com/PaulAntonDeen) for testing and verifying
 
 
