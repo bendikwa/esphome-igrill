@@ -59,7 +59,7 @@ sensor:
     propane_level:
       name: "IGrill v3 Propane level"
  
- binary_sensor:
+binary_sensor:
   - platform: template
     name: "iGrill v3 connection status"
     id: v3_connection_bin
