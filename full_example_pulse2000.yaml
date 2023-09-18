@@ -63,7 +63,7 @@ sensor:
     pulse_heating_setpoint2:
       name: "Weber Pulse 2000 Right setpoint"
  
- binary_sensor:
+binary_sensor:
   - platform: template
     name: "iGrill Pulse 2000 connection status"
     id: pulse2k_connection_bin
