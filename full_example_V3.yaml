@@ -4,7 +4,7 @@ esphome:
 esp32:
   board: esp32dev
   framework:
-    type: arduino
+    type: Use esp-idf in examples
 
 # Enable logging
 logger:
