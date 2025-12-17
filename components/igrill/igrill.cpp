@@ -167,7 +167,7 @@ namespace esphome
       {
         ESP_LOGI(TAG, "Detected model: iDevices Kitchen");
         num_probes = 2;
-        service = IGRILLV3_TEMPERATURE_SERVICE_UUID;
+        service = IDEVICES_KITCHEN_TEMPERATURE_SERVICE_UUID;
       }
       else if (has_service_(PULSE_1000_TEMPERATURE_SERVICE_UUID))
       {
