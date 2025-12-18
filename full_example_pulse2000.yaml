@@ -22,7 +22,7 @@ wifi:
   password: !secret wifi_password
 
 external_components:
-  - source: github://bendikwa/esphome-igrill@v1.2
+  - source: github://bendikwa/esphome-igrill@v1.3
 
 esp32_ble_tracker:
 
