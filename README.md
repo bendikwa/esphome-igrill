@@ -42,6 +42,7 @@ In principle, all IGrill devices, including the Pulse 2000 are supported, but I 
 - [x] IGrill V3
 - [x] Weber Pulse 1000 Thanks to [samvanh](https://github.com/samvanh) for verifying
 - [x] Weber Pulse 2000 Thanks to [PaulAntonDeen](https://github.com/PaulAntonDeen) for testing and verifying
+- [x] iDevices LLC Kitchen Bleutooth Smart Thermometer Thanks to [Burak](https://github.com/108burakk) for testing and verifying
 
 
 If you own one of the untested models, I would be thankfull if you create a ticket so we can get it confirmed working.
