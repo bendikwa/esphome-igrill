@@ -31,6 +31,17 @@ CONF_PULSE_ACTUAL2 = "pulse_heating_actual2"
 CONF_PULSE_SETPOINT1 = "pulse_heating_setpoint1"
 CONF_PULSE_SETPOINT2 = "pulse_heating_setpoint2"
 
+# ESPHome 2026.x removed Sensor::set_unit_of_measurement() from the runtime API.
+# Unit must now be set at compile time via the schema. We default to UNIT_CELSIUS
+# to match the iGrill device default. Override with `unit_of_measurement: "°F"`
+# in your YAML if your device is configured for Fahrenheit.
+_TEMPERATURE_PROBE_SCHEMA = sensor.sensor_schema(
+    unit_of_measurement=UNIT_CELSIUS,
+    accuracy_decimals=2,
+    device_class=DEVICE_CLASS_TEMPERATURE,
+    state_class=STATE_CLASS_MEASUREMENT,
+)
+
 CONFIG_SCHEMA = cv.All(
     cv.Schema(
         {
@@ -42,46 +53,14 @@ CONFIG_SCHEMA = cv.All(
                 state_class=STATE_CLASS_MEASUREMENT,
                 entity_category=ENTITY_CATEGORY_DIAGNOSTIC,
             ),
-            cv.Optional(CONF_TEMPERATURE_PROBE1): sensor.sensor_schema(
-                accuracy_decimals=2,
-                device_class=DEVICE_CLASS_TEMPERATURE,
-                state_class=STATE_CLASS_MEASUREMENT,
-            ),
-            cv.Optional(CONF_TEMPERATURE_PROBE2): sensor.sensor_schema(
-                accuracy_decimals=2,
-                device_class=DEVICE_CLASS_TEMPERATURE,
-                state_class=STATE_CLASS_MEASUREMENT,
-            ),
-            cv.Optional(CONF_TEMPERATURE_PROBE3): sensor.sensor_schema(
-                accuracy_decimals=2,
-                device_class=DEVICE_CLASS_TEMPERATURE,
-                state_class=STATE_CLASS_MEASUREMENT,
-            ),
-            cv.Optional(CONF_TEMPERATURE_PROBE4): sensor.sensor_schema(
-                accuracy_decimals=2,
-                device_class=DEVICE_CLASS_TEMPERATURE,
-                state_class=STATE_CLASS_MEASUREMENT,
-            ),
-            cv.Optional(CONF_PULSE_ACTUAL1): sensor.sensor_schema(
-                accuracy_decimals=2,
-                device_class=DEVICE_CLASS_TEMPERATURE,
-                state_class=STATE_CLASS_MEASUREMENT,
-            ),
-            cv.Optional(CONF_PULSE_ACTUAL2): sensor.sensor_schema(
-                accuracy_decimals=2,
-                device_class=DEVICE_CLASS_TEMPERATURE,
-                state_class=STATE_CLASS_MEASUREMENT,
-            ),
-            cv.Optional(CONF_PULSE_SETPOINT1): sensor.sensor_schema(
-                accuracy_decimals=2,
-                device_class=DEVICE_CLASS_TEMPERATURE,
-                state_class=STATE_CLASS_MEASUREMENT,
-            ),
-            cv.Optional(CONF_PULSE_SETPOINT2): sensor.sensor_schema(
-                accuracy_decimals=2,
-                device_class=DEVICE_CLASS_TEMPERATURE,
-                state_class=STATE_CLASS_MEASUREMENT,
-            ),
+            cv.Optional(CONF_TEMPERATURE_PROBE1): _TEMPERATURE_PROBE_SCHEMA,
+            cv.Optional(CONF_TEMPERATURE_PROBE2): _TEMPERATURE_PROBE_SCHEMA,
+            cv.Optional(CONF_TEMPERATURE_PROBE3): _TEMPERATURE_PROBE_SCHEMA,
+            cv.Optional(CONF_TEMPERATURE_PROBE4): _TEMPERATURE_PROBE_SCHEMA,
+            cv.Optional(CONF_PULSE_ACTUAL1): _TEMPERATURE_PROBE_SCHEMA,
+            cv.Optional(CONF_PULSE_ACTUAL2): _TEMPERATURE_PROBE_SCHEMA,
+            cv.Optional(CONF_PULSE_SETPOINT1): _TEMPERATURE_PROBE_SCHEMA,
+            cv.Optional(CONF_PULSE_SETPOINT2): _TEMPERATURE_PROBE_SCHEMA,
             cv.Optional(CONF_PROPANE_LEVEL): sensor.sensor_schema(
                 unit_of_measurement=UNIT_PERCENT,
                 accuracy_decimals=0,
