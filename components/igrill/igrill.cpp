@@ -48,7 +48,7 @@ namespace esphome
           ESP_LOGV(TAG, "This ESP_GATTC_SEARCH_CMPL_EVT is not for me. (conn_id mismatch");
           break;
         }
-        // Detect IGrill model and get hadles for the appropriate number of probes.
+        // Detect IGrill model and get handles for the appropriate number of probes.
         IGrill::detect_and_init_igrill_model_();
 
         // Get handle for battery level
@@ -68,7 +68,7 @@ namespace esphome
         this->device_challenge_handle_ = get_handle_(AUTHENTICATION_SERVICE_UUID, DEVICE_CHALLENGE_UUID);
         this->value_readers_[this->device_challenge_handle_] = &IGrill::loopback_device_challenge_response_;
 
-        ESP_LOGD(TAG, "Starting autheintication process");
+        ESP_LOGD(TAG, "Starting authentication process");
         send_authentication_challenge_();
 
         this->node_state = esp32_ble_tracker::ClientState::ESTABLISHED;
@@ -118,7 +118,8 @@ namespace esphome
             ESP_LOGV(TAG, "Read char event received for handle: 0x%x", param->read.handle);
             (this->*value_readers_[param->read.handle])(param->read.value, param->read.value_len);
           }
-          else{
+          else
+          {
             ESP_LOGD(TAG, "No read function defined for handle: 0x%x", param->read.handle);
           }
         }
@@ -213,11 +214,11 @@ namespace esphome
           uint16_t probe_handle = get_handle_(service, probes[i]);
           this->probe_handles_.push_back(probe_handle);
           this->value_readers_[probe_handle] = read_functions[i];
-          ESP_LOGV(TAG, "Probe nuber %d added with handle 0x%x", i, probe_handle);
+          ESP_LOGV(TAG, "Probe number %d added with handle 0x%x", i, probe_handle);
         }
         else
         {
-          ESP_LOGD(TAG, "No sensor configured for probe nuber %d. Skipping", i+1);
+          ESP_LOGD(TAG, "No sensor configured for probe number %d. Skipping", i+1);
         }
       }
       if (service == PULSE_1000_TEMPERATURE_SERVICE_UUID || service == PULSE_2000_TEMPERATURE_SERVICE_UUID)
@@ -244,41 +245,43 @@ namespace esphome
 
     void IGrill::read_battery_(uint8_t *raw_value, uint16_t value_len)
     {
-
       this->battery_level_sensor_->publish_state((float)*raw_value);
     }
 
     void IGrill::read_propane_(uint8_t *raw_value, uint16_t value_len)
     {
-
       this->propane_level_sensor_->publish_state(((float)*raw_value * 25));
     }
 
     void IGrill::read_pulse_element_(uint8_t *raw_value, uint16_t value_len)
     {
-      if (this->pulse_heating_actual1_){
+      if (this->pulse_heating_actual1_)
+      {
         std::string actual1;
         actual1.assign(reinterpret_cast<char*>(raw_value)+1, 3);
-        ESP_LOGV(TAG, "Parsed actual1 form pulse element data %s", actual1);
+        ESP_LOGV(TAG, "Parsed actual1 from pulse element data %s", actual1.c_str());
         this->pulse_heating_actual1_->publish_state(stoi(actual1));
       }
-      if (this->pulse_heating_actual2_){
+      if (this->pulse_heating_actual2_)
+      {
         std::string actual2;
         actual2.assign(reinterpret_cast<char*>(raw_value)+5, 3);
-        ESP_LOGV(TAG, "Parsed actual2 form pulse element data %s", actual2);
+        ESP_LOGV(TAG, "Parsed actual2 from pulse element data %s", actual2.c_str());
         this->pulse_heating_actual2_->publish_state(stoi(actual2));
       }
-      if (this->pulse_heating_setpoint1_){
-        std::string setpoint1_;
-        setpoint1_.assign(reinterpret_cast<char*>(raw_value)+9, 3);
-        ESP_LOGV(TAG, "Parsed setpoint1 form pulse element data %s", setpoint1_);
-        this->pulse_heating_setpoint1_->publish_state(stoi(setpoint1_));
+      if (this->pulse_heating_setpoint1_)
+      {
+        std::string setpoint1;
+        setpoint1.assign(reinterpret_cast<char*>(raw_value)+9, 3);
+        ESP_LOGV(TAG, "Parsed setpoint1 from pulse element data %s", setpoint1.c_str());
+        this->pulse_heating_setpoint1_->publish_state(stoi(setpoint1));
       }
-      if (this->pulse_heating_setpoint2_){
-        std::string setpoint2_;
-        setpoint2_.assign(reinterpret_cast<char*>(raw_value)+13, 3);
-        ESP_LOGV(TAG, "Parsed setpoint2 form pulse element data %s", setpoint2_);
-        this->pulse_heating_setpoint2_->publish_state(stoi(setpoint2_));
+      if (this->pulse_heating_setpoint2_)
+      {
+        std::string setpoint2;
+        setpoint2.assign(reinterpret_cast<char*>(raw_value)+13, 3);
+        ESP_LOGV(TAG, "Parsed setpoint2 from pulse element data %s", setpoint2.c_str());
+        this->pulse_heating_setpoint2_->publish_state(stoi(setpoint2));
       }
     }
 
@@ -292,17 +295,14 @@ namespace esphome
       {
         this->unit_of_measurement_ = CELCIUS_UNIT_STRING;
       }
-      ESP_LOGI(TAG, "Setting temperature unit based on device: %s", this->unit_of_measurement_);
-      for (auto & sensor : this->sensors_)
-      {
-        if (sensor)
-        {
-          sensor->set_unit_of_measurement(this->unit_of_measurement_);
-        }
-      }
+      // ESPHome 2026.x removed Sensor::set_unit_of_measurement() from the public API.
+      // Unit of measurement must now be declared at compile time in the sensor schema / YAML.
+      // The device-reported unit is logged here for reference only.
+      // If your iGrill is set to °F, add `unit_of_measurement: "°F"` to each probe in YAML.
+      ESP_LOGI(TAG, "Device reports temperature unit: %s (unit set at compile time via YAML, not at runtime)", this->unit_of_measurement_);
       request_read_values_();
     }
-    
+
     void IGrill::read_temperature_(uint8_t *raw_value, uint16_t value_len, int probe)
     {
       uint16_t raw_temp = (raw_value[1] << 8) | raw_value[0];
@@ -347,10 +347,8 @@ namespace esphome
     void IGrill::send_authentication_challenge_()
     {
       uint8_t zero_payload[16] = {};
-      ;
       ESP_LOGD(TAG, "Sending app challenge with all '0's");
       auto status = esp_ble_gattc_write_char(this->parent()->get_gattc_if(), this->parent()->get_conn_id(), app_challenge_handle_, sizeof(zero_payload), zero_payload, ESP_GATT_WRITE_TYPE_RSP, ESP_GATT_AUTH_REQ_NONE);
-
       if (status)
       {
         ESP_LOGW(TAG, "Error writing challenge to app challenge characteristic, status=%d", status);
@@ -359,10 +357,8 @@ namespace esphome
 
     void IGrill::loopback_device_challenge_response_(uint8_t *raw_value, uint16_t value_len)
     {
-
       ESP_LOGD(TAG, "Sending encrypted device response back to device.");
       auto status = esp_ble_gattc_write_char(this->parent()->get_gattc_if(), this->parent()->get_conn_id(), device_response_handle_, value_len, raw_value, ESP_GATT_WRITE_TYPE_RSP, ESP_GATT_AUTH_REQ_NONE);
-
       if (status)
       {
         ESP_LOGW(TAG, "Error writing challenge response to device response characteristic, status=%d", status);
@@ -392,6 +388,7 @@ namespace esphome
     void IGrill::request_read_values_()
     {
       esp_err_t status = ESP_OK;
+
       // Read battery level
       if (this->battery_level_sensor_ != nullptr)
       {
@@ -404,7 +401,7 @@ namespace esphome
       }
 
       // Read temperature probes
-      for (auto & probe_handle : probe_handles_)
+      for (auto &probe_handle : probe_handles_)
       {
         ESP_LOGV(TAG, "Requesting read of temperature probe on handle (0x%x)", probe_handle);
         status = esp_ble_gattc_read_char(this->parent()->get_gattc_if(), this->parent()->get_conn_id(), probe_handle, ESP_GATT_AUTH_REQ_NONE);
@@ -448,13 +445,12 @@ namespace esphome
           return false;
         }
       }
-
       return true;
     }
 
     void IGrill::dump_config()
     {
-      for (auto & element : this->sensors_)
+      for (auto &element : this->sensors_)
       {
         if (element)
         {
