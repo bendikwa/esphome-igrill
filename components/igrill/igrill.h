@@ -24,6 +24,7 @@ namespace esphome
     static const char *const DEVICE_RESPONSE_UUID = "64AC0004-4A4B-4B58-9F37-94D3C52FFDF7";
 
     static const char *const IGRILL_MINI_TEMPERATURE_SERVICE_UUID = "63C70000-4A82-4261-95FF-92CF32477861";
+    static const char *const IDEVICES_KITCHEN_TEMPERATURE_SERVICE_UUID = "19450000-9B05-40BB-80D8-7C85840AEC34";
     static const char *const IGRILL_MINIV2_TEMPERATURE_SERVICE_UUID = "9d610c43-ae1d-41a9-9b09-3c7ecd5c6035";
     static const char *const IGRILLV2_TEMPERATURE_SERVICE_UUID = "A5C50000-F186-4BD6-97F2-7EBACBA0D708";
     static const char *const IGRILLV202_TEMPERATURE_SERVICE_UUID = "ADA7590F-2E6D-469E-8F7B-1822B386A5E9";
@@ -37,7 +38,7 @@ namespace esphome
     static const char *const PROBE3_TEMPERATURE = "06ef0006-2e06-4b79-9e33-fce2c42805ec";
     static const char *const PROBE4_TEMPERATURE = "06ef0008-2e06-4b79-9e33-fce2c42805ec";
     static const char *const PULSE_ELEMENT_UUID = "6c91000a-58dc-41c7-943f-518b278ceaaa";
-    
+
     static const char *const PROPANE_LEVEL_SERVICE_UUID = "F5D40000-3548-4C22-9947-F3673FCE3CD9";
     static const char *const PROPANE_LEVEL = "f5d40001-3548-4c22-9947-f3673fce3cd9";
 
@@ -45,7 +46,7 @@ namespace esphome
     static const char *const BATTERY_LEVEL_UUID = "2A19";
 
     static const uint16_t UNPLUGGED_PROBE_CONSTANT = 63536;
-    
+
     static const char *const FAHRENHEIT_UNIT_STRING = "°F";
     static const char *const CELCIUS_UNIT_STRING = "°C";
 
@@ -65,8 +66,9 @@ namespace esphome
       void set_pulse_setpoint2(sensor::Sensor *pulse_setpoint) { pulse_heating_setpoint2_ = pulse_setpoint; }
       void set_propane(sensor::Sensor *propane) { propane_level_sensor_ = propane; }
       void set_battery(sensor::Sensor *battery) { battery_level_sensor_ = battery; }
-      void set_send_value_when_unplugged(bool send_value_when_unplugged) { ESP_LOGE("igrill", "send_value_when_unplugged: %d", send_value_when_unplugged); send_value_when_unplugged_ = send_value_when_unplugged; }
-      void set_unplugged_probe_value(float unplugged_probe_value) {unplugged_probe_value_ = unplugged_probe_value; }
+      // Removed stray ESP_LOGE debug call that was present in upstream v1.2
+      void set_send_value_when_unplugged(bool send_value_when_unplugged) { send_value_when_unplugged_ = send_value_when_unplugged; }
+      void set_unplugged_probe_value(float unplugged_probe_value) { unplugged_probe_value_ = unplugged_probe_value; }
 
     protected:
       void detect_and_init_igrill_model_();
@@ -93,7 +95,7 @@ namespace esphome
       bool send_value_when_unplugged_;
       float unplugged_probe_value_;
       const char *unit_of_measurement_{nullptr};
-      
+
       std::vector<sensor::Sensor *> sensors_ = {nullptr, nullptr, nullptr, nullptr};
       sensor::Sensor *battery_level_sensor_{nullptr};
       sensor::Sensor *propane_level_sensor_{nullptr};
