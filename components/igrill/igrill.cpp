@@ -306,7 +306,7 @@ namespace esphome
       {
         if (this->sensors_[i])
         {
-          const StringRef unit = this->sensors_[i]->get_unit_of_measurement_ref() if (unit.compare(this->unit_of_measurement_))
+          const StringRef unit = this->sensors_[i]->get_unit_of_measurement_ref() if (unit.compare(this->unit_of_measurement_));
           {
             ESP_LOGI(TAG, "Temperature unit configured for %s in YAML: %s", this->sensors_[i]->get_name(), this->sensors_[i]->get_unit_of_measurement_ref());
           }
