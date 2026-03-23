@@ -300,6 +300,21 @@ namespace esphome
       // The device-reported unit is logged here for reference only.
       // If your iGrill is set to °F, add `unit_of_measurement: "°F"` to each probe in YAML.
       ESP_LOGI(TAG, "Device reports temperature unit: %s (unit set at compile time via YAML, not at runtime)", this->unit_of_measurement_);
+      for (int i = 0; i < this->num_probes; i++)
+      {
+        if (this->sensors_[i])
+        {
+          if (this->unit_of_measurement_ == this->sensors_[i]->get_unit_of_measurement_ref())
+          {
+            ESP_LOGD(TAG, "Sensor: %s match unit set in YAML: %s", this->sensors_[i]->get_name().c_str(), this->sensors_[i]->get_unit_of_measurement_ref().c_str());
+          }
+          else
+          {
+            ESP_LOGW(TAG, "Sensor: %s unit set in YAML: %s does not match device-reported unit: %s. Please update your YAML to set the correct unit_of_measurement for this sensor or change the device unit with the iGrill app.",
+                     this->sensors_[i]->get_name().c_str(), this->sensors_[i]->get_unit_of_measurement_ref().c_str(), this->unit_of_measurement_);
+          }
+        }
+      }
       request_read_values_();
     }
 
