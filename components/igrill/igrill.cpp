@@ -300,20 +300,18 @@ namespace esphome
       // The device-reported unit is logged here for reference only.
       // If your iGrill is set to °F, add `unit_of_measurement: "°F"` to each probe in YAML.
       ESP_LOGI(TAG, "Device reports temperature unit: %s (unit set at compile time via YAML, not at runtime)", this->unit_of_measurement_);
-
-      // Checks configured unit of measurement for all configured sensors, and logs a warning if they do not match the device
       for (int i = 0; i < this->num_probes; i++)
       {
         if (this->sensors_[i])
         {
-          const StringRef unit = this->sensors_[i]->get_unit_of_measurement_ref();
-          if (unit.compare(this->unit_of_measurement_))
+          if (this->unit_of_measurement_ == this->sensors_[i]->get_unit_of_measurement_ref())
           {
-            ESP_LOGI(TAG, "Temperature unit configured for %s in YAML: %s", this->sensors_[i]->get_name(), this->sensors_[i]->get_unit_of_measurement_ref());
+            ESP_LOGD(TAG, "Sensor: %s match unit set in YAML: %s", this->sensors_[i]->get_name().c_str(), this->sensors_[i]->get_unit_of_measurement_ref().c_str());
           }
           else
           {
-            ESP_LOGW(TAG, "Missmatch in temperature unit. Device reports %s, while %s is configured as %s in YAML.", this->unit_of_measurement_, this->sensors_[i]->get_name(), this->sensors_[i]->get_unit_of_measurement_ref());
+            ESP_LOGW(TAG, "Sensor: %s unit set in YAML: %s does not match device-reported unit: %s. Please update your YAML to set the correct unit_of_measurement for this sensor or change the device unit with the iGrill app.",
+                     this->sensors_[i]->get_name().c_str(), this->sensors_[i]->get_unit_of_measurement_ref().c_str(), this->unit_of_measurement_);
           }
         }
       }
