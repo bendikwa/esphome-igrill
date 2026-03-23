@@ -258,7 +258,7 @@ namespace esphome
       if (this->pulse_heating_actual1_)
       {
         std::string actual1;
-        actual1.assign(reinterpret_cast<char *>(raw_value)+1, 3);
+        actual1.assign(reinterpret_cast<char*>(raw_value)+1, 3);
         ESP_LOGV(TAG, "Parsed actual1 from pulse element data %s", actual1.c_str());
         this->pulse_heating_actual1_->publish_state(stoi(actual1));
       }
@@ -272,14 +272,14 @@ namespace esphome
       if (this->pulse_heating_setpoint1_)
       {
         std::string setpoint1;
-        setpoint1.assign(reinterpret_cast<char *>(raw_value)+9, 3);
+        setpoint1.assign(reinterpret_cast<char*>(raw_value)+9, 3);
         ESP_LOGV(TAG, "Parsed setpoint1 from pulse element data %s", setpoint1.c_str());
         this->pulse_heating_setpoint1_->publish_state(stoi(setpoint1));
       }
       if (this->pulse_heating_setpoint2_)
       {
         std::string setpoint2;
-        setpoint2.assign(reinterpret_cast<char *>(raw_value)+13, 3);
+        setpoint2.assign(reinterpret_cast<char*>(raw_value)+13, 3);
         ESP_LOGV(TAG, "Parsed setpoint2 from pulse element data %s", setpoint2.c_str());
         this->pulse_heating_setpoint2_->publish_state(stoi(setpoint2));
       }
