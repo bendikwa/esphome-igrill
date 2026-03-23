@@ -265,7 +265,7 @@ namespace esphome
       if (this->pulse_heating_actual2_)
       {
         std::string actual2;
-        actual2.assign(reinterpret_cast<char *>(raw_value)+5, 3);
+        actual2.assign(reinterpret_cast<char*>(raw_value)+5, 3);
         ESP_LOGV(TAG, "Parsed actual2 from pulse element data %s", actual2.c_str());
         this->pulse_heating_actual2_->publish_state(stoi(actual2));
       }
