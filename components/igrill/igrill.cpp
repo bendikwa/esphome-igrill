@@ -218,7 +218,7 @@ namespace esphome
         }
         else
         {
-          ESP_LOGD(TAG, "No sensor configured for probe number %d. Skipping", i + 1);
+          ESP_LOGD(TAG, "No sensor configured for probe number %d. Skipping", i+1);
         }
       }
       if (service == PULSE_1000_TEMPERATURE_SERVICE_UUID || service == PULSE_2000_TEMPERATURE_SERVICE_UUID)
@@ -258,28 +258,28 @@ namespace esphome
       if (this->pulse_heating_actual1_)
       {
         std::string actual1;
-        actual1.assign(reinterpret_cast<char *>(raw_value) + 1, 3);
+        actual1.assign(reinterpret_cast<char *>(raw_value)+1, 3);
         ESP_LOGV(TAG, "Parsed actual1 from pulse element data %s", actual1.c_str());
         this->pulse_heating_actual1_->publish_state(stoi(actual1));
       }
       if (this->pulse_heating_actual2_)
       {
         std::string actual2;
-        actual2.assign(reinterpret_cast<char *>(raw_value) + 5, 3);
+        actual2.assign(reinterpret_cast<char *>(raw_value)+5, 3);
         ESP_LOGV(TAG, "Parsed actual2 from pulse element data %s", actual2.c_str());
         this->pulse_heating_actual2_->publish_state(stoi(actual2));
       }
       if (this->pulse_heating_setpoint1_)
       {
         std::string setpoint1;
-        setpoint1.assign(reinterpret_cast<char *>(raw_value) + 9, 3);
+        setpoint1.assign(reinterpret_cast<char *>(raw_value)+9, 3);
         ESP_LOGV(TAG, "Parsed setpoint1 from pulse element data %s", setpoint1.c_str());
         this->pulse_heating_setpoint1_->publish_state(stoi(setpoint1));
       }
       if (this->pulse_heating_setpoint2_)
       {
         std::string setpoint2;
-        setpoint2.assign(reinterpret_cast<char *>(raw_value) + 13, 3);
+        setpoint2.assign(reinterpret_cast<char *>(raw_value)+13, 3);
         ESP_LOGV(TAG, "Parsed setpoint2 from pulse element data %s", setpoint2.c_str());
         this->pulse_heating_setpoint2_->publish_state(stoi(setpoint2));
       }
