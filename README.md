@@ -12,7 +12,7 @@ To use this component, include it as an [External component](https://esphome.io/
 
 ```yaml
 external_components:
-  - source: github://bendikwa/esphome-igrill@v1.2
+  - source: github://bendikwa/esphome-igrill@v1.4
 ```
 
 ## Device discovery
@@ -76,20 +76,21 @@ sensor:
 ```
 ## Configuration variables
 - **update_interval** (*Optional,* [Time](https://esphome.io/guides/configuration-types.html#config-time)) The interval between each read and publish of sensor values. Defaults to "30s"
+- **unit_of_measurement** (*Optional,* string): Manually set the unit of measurement the sensor should advertise its values with. This does not actually do any maths (conversion between units). Defaults to "°C"
 - **send_value_when_unplugged** (*Optional,* boolean): When set to `false`, the component will skip publishing for probes that are unplugged. Defaults to `true`
 - **unplugged_probe_value** (*Optional,* integer): The value to publish when a probe is disconnected, and **send_value_when_unplugged** is `true`. Defaults to 0
 
 ## Available Sensors
-- **temperature_probe1** (*Optional) The reported temperature of probe 1
-- **temperature_probe2** (*Optional) The reported temperature of probe 2
-- **temperature_probe3** (*Optional) The reported temperature of probe 3
-- **temperature_probe4** (*Optional) The reported temperature of probe 4
-- **pulse_heating_actual1** (*Optional) The reported temperature of the left heating element on a Pulse 2000
-- **pulse_heating_actual2** (*Optional) The reported temperature of the right heating element on a Pulse 2000
-- **pulse_heating_setpoint1** (*Optional) The reported setpoint of the left heating element on a Pulse 2000
-- **pulse_heating_setpoint2** (*Optional) The reported setpoint of the right heating element on a Pulse 2000
-- **propane_level** (*Optional) The propane level on a V3 device
-- **battery_level** (*Optional) The battery level of the igrill device
+- **temperature_probe1** (*Optional*) The reported temperature of probe 1
+- **temperature_probe2** (*Optional*) The reported temperature of probe 2
+- **temperature_probe3** (*Optional*) The reported temperature of probe 3
+- **temperature_probe4** (*Optional*) The reported temperature of probe 4
+- **pulse_heating_actual1** (*Optional*) The reported temperature of the left heating element on a Pulse 2000
+- **pulse_heating_actual2** (*Optional*) The reported temperature of the right heating element on a Pulse 2000
+- **pulse_heating_setpoint1** (*Optional*) The reported setpoint of the left heating element on a Pulse 2000
+- **pulse_heating_setpoint2** (*Optional*) The reported setpoint of the right heating element on a Pulse 2000
+- **propane_level** (*Optional*) The propane level on a V3 device
+- **battery_level** (*Optional*) The battery level of the igrill device
 
 ## Additional diagnostic connection sensors
 If you require HA sensors to indicate if a BT connection to the iGrill device is established (e.g. for conditional cards), you can use the automations included in `ble_client` to update a template binary sensor like this:
@@ -118,7 +119,13 @@ binary_sensor:
 ```
 
 ## Temperature unit:
-The temperature unit of the sensors are set to the unit reported by the iGrill device
+ESPHome does not support setting sensor temperature unit runtime, so this must be set at compiletime in the YAML config using the `unit_of_measurement` value. This defaults to "°C".
+
+The ESPHome setting is per sensor, but the iGrill has the same for all probes, so if you want to have temperature reported in Farenheit, you need to set `unit_of_measurement: "°F"` on all probes.
+
+You need to set your device to the same unit as you configure in YAML using the iGrill app.
+
+A warning is logged if a mismatch in config is detected.
 
 ## Troubleshooting
 
@@ -144,7 +151,7 @@ What works:
 - Publishing of Pulse 2000 heating element values
 - Publishing of battery level
 - Publishing of propane level (Untested)
-- Use correct temperature unit (read from device)
+- ~~Use correct temperature unit (read from device)~~
 
 TODO:
 - Publish firmware version

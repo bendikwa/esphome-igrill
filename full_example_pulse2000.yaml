@@ -22,7 +22,7 @@ wifi:
   password: !secret wifi_password
 
 external_components:
-  - source: github://bendikwa/esphome-igrill@v1.3
+  - source: github://bendikwa/esphome-igrill@v1.4
 
 esp32_ble_tracker:
 
@@ -48,20 +48,28 @@ sensor:
     unplugged_probe_value: 0 # default
     temperature_probe1:
       name: "Weber Pulse 2000 temp probe 1"
+      unit_of_measurement: "°C" # default
     temperature_probe2:
       name: "Weber Pulse 2000 temp probe 2"
+      unit_of_measurement: "°C" # default
     temperature_probe3:
       name: "Weber Pulse 2000 temp probe 3"
+      unit_of_measurement: "°C" # default
     temperature_probe4:
       name: "Weber Pulse 2000 temp probe 4"
+      unit_of_measurement: "°C" # default
     pulse_heating_actual1:
       name: "Weber Pulse 2000 Left temp"
+      unit_of_measurement: "°C" # default
     pulse_heating_actual2:
       name: "Weber Pulse 2000 Right temp"
+      unit_of_measurement: "°C" # default
     pulse_heating_setpoint1:
       name: "Weber Pulse 2000 Left setpoint"
+      unit_of_measurement: "°C" # default
     pulse_heating_setpoint2:
       name: "Weber Pulse 2000 Right setpoint"
+      unit_of_measurement: "°C" # default
  
 binary_sensor:
   - platform: template

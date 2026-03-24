@@ -22,7 +22,7 @@ wifi:
   password: !secret wifi_password
 
 external_components:
-  - source: github://bendikwa/esphome-igrill@v1.3
+  - source: github://bendikwa/esphome-igrill@v1.4
 
 esp32_ble_tracker:
 
@@ -50,6 +50,7 @@ sensor:
       name: "IGrill Mini battery"
     temperature_probe1:
       name: "IGrill Mini temp probe"
+      unit_of_measurement: "°C" # default
 
 binary_sensor:
   - platform: template
