@@ -4,7 +4,7 @@ ESPHome Custom Component for the iGrill Bluetooth Thermometers
 This component will let you use a supported ESP32 to read sensor values from IGrill bluetooth thermometers and Pulse BBQ's.
 
 > [!IMPORTANT]
-> To be compatible with [ESPHome 2026.3.0](https://esphome.io/changelog/2026.3.0) or above, you need to `v1.4` og later of this component
+> To be compatible with [ESPHome 2026.3.0](https://esphome.io/changelog/2026.3.0) or above, you need to `v1.4` or later of this component
 
 ## Installation
 
