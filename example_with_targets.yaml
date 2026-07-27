@@ -1,4 +1,4 @@
-# Example: iGrill V3 with 4 probes, reading temps + battery,
+# Example: iGrill V2 with 4 probes, reading temps + battery,
 # and reading/WRITING each probe's alarm/target temperature.
 #
 # Setting the number entities below (e.g. from Home Assistant, or from
