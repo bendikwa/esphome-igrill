@@ -47,8 +47,29 @@ In principle, all IGrill devices, including the Pulse 2000 are supported, but I 
 - [x] Weber Pulse 2000 Thanks to [PaulAntonDeen](https://github.com/PaulAntonDeen) for testing and verifying
 - [x] iDevices LLC Kitchen Bleutooth Smart Thermometer Thanks to [Burak](https://github.com/108burakk) for testing and verifying
 
-
 If you own one of the untested models, I would be thankfull if you create a ticket so we can get it confirmed working.
+
+### Target temperature (read/write) verified
+ 
+The BLE write format for the alarm/target temperature characteristic was
+reverse-engineered from a packet capture of the official app, and confirmed
+working on the model below. Other models use the same characteristic
+pattern for temperature reading, so are likely compatible, but are
+unconfirmed for **writing** a target until tested:
+ 
+- [x] IGrill V2 - confirmed read + write, verified against a BLE HCI capture
+      of the official app setting an alarm on the same hardware
+- [ ] IGrill mini
+- [ ] IGrill mini V2
+- [ ] IGrill V202
+- [ ] IGrill V3
+- [ ] Weber Pulse 1000
+- [ ] Weber Pulse 2000 (uses a different characteristic for heating-element
+      setpoints; not covered by this feature at all currently)
+- [ ] iDevices LLC Kitchen Bluetooth Smart Thermometer
+ 
+If you test this on an untested model, please comment on the PR/issue so
+the list can be updated.
 
 ## Configuration example
 
@@ -62,18 +83,37 @@ ble_client:
 sensor:
   - platform: igrill
     ble_client_id: igrill_device
+    id: igrill_component
     update_interval: 30s # default
     battery_level:
-      name: "IGrill v3 battery"
+      name: "IGrill battery"
     temperature_probe1:
-      name: "IGrill v3 temp probe 1"
+      name: "IGrill temp probe 1"
     temperature_probe2:
-      name: "IGrill v3 temp probe 2"
+      name: "IGrill temp probe 2"
     temperature_probe3:
-      name: "IGrill v3 temp probe 3"
+      name: "IGrill temp probe 3"
     temperature_probe4:
-      name: "IGrill v3 temp probe 4"
+      name: "IGrill temp probe 4"
+
+number:
+  - platform: igrill
+    igrill_id: igrill_component
+    temperature_threshold_probe1:
+      name: "IGrill target probe 1"
+    temperature_threshold_probe2:
+      name: "IGrill target probe 2"
+    temperature_threshold_probe3:
+      name: "IGrill target probe 3"
+    temperature_threshold_probe4:
+      name: "IGrill target probe 4"
 ```
+> [!NOTE]
+> The `number:` platform requires the `IGrill` component to have an explicit
+> `id:` set under `sensor:` (see `igrill_component` in the example above), since
+> `number:` references it via `igrill_id:` rather than declaring its own
+> connection.
+
 ## Configuration variables
 - **update_interval** (*Optional,* [Time](https://esphome.io/guides/configuration-types.html#config-time)) The interval between each read and publish of sensor values. Defaults to "30s"
 - **unit_of_measurement** (*Optional,* string): Manually set the unit of measurement the sensor should advertise its values with. This does not actually do any maths (conversion between units). Defaults to "°C"
@@ -91,6 +131,29 @@ sensor:
 - **pulse_heating_setpoint2** (*Optional*) The reported setpoint of the right heating element on a Pulse 2000
 - **propane_level** (*Optional*) The propane level on a V3 device
 - **battery_level** (*Optional*) The battery level of the igrill device
+
+## Available Numbers
+Setting one of these writes the value directly to the iGrill over BLE,
+which arms the device's own onboard buzzer for that probe — the same as
+setting a target from the official app.
+ 
+- **temperature_threshold_probe1** (*Optional*) Target/alarm temperature for probe 1
+- **temperature_threshold_probe2** (*Optional*) Target/alarm temperature for probe 2
+- **temperature_threshold_probe3** (*Optional*) Target/alarm temperature for probe 3
+- **temperature_threshold_probe4** (*Optional*) Target/alarm temperature for probe 4
+ 
+Each accepts the following options:
+- **min_value** (*Optional,* float): Defaults to `0`
+- **max_value** (*Optional,* float): Defaults to `300`
+- **step** (*Optional,* float): Defaults to `1`
+ 
+As with the temperature sensors, values are written/read in whatever unit
+the device is currently configured for — no conversion is performed. If your
+device is set to °F, override `unit_of_measurement`/`min_value`/`max_value`
+accordingly (e.g. `max_value: 572`).
+ 
+If no target has ever been set on a probe (via the app or over BLE), the
+number entity will show as `unknown` rather than a placeholder value.
 
 ## Additional diagnostic connection sensors
 If you require HA sensors to indicate if a BT connection to the iGrill device is established (e.g. for conditional cards), you can use the automations included in `ble_client` to update a template binary sensor like this:
@@ -152,8 +215,8 @@ What works:
 - Publishing of battery level
 - Publishing of propane level (Untested)
 - ~~Use correct temperature unit (read from device)~~
-
+- Read and write temperature setpoint on probes
+ 
 TODO:
 - Publish firmware version
-- Read and write temperature setpoint on probes
 - Set temperature unit (write to device)
