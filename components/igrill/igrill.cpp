@@ -79,6 +79,16 @@ void IGrill::gattc_event_handler(esp_gattc_cb_event_t event, esp_gatt_if_t gattc
         ESP_LOGD(TAG, "Authentication complete");
         request_temp_unit_read_();
         break;
+      } else {
+        // Any other successful write (e.g. a threshold/target temperature
+        // write) lands here. IMPORTANT: this must break out of the switch.
+        // esp_ble_gattc_cb_param_t is a C union - param->write and
+        // param->read overlap the same memory. Falling through into the
+        // ESP_GATTC_READ_CHAR_EVT case below (as upstream did) reinterprets
+        // uninitialized write-event memory as a read-event's value pointer,
+        // which crashes (LoadProhibited) as soon as it's dereferenced.
+        ESP_LOGD(TAG, "Write completed successfully for handle 0x%x", param->write.handle);
+        break;
       }
     }
 
@@ -160,6 +170,9 @@ void IGrill::add_temperature_probe_handles_(const char *service) {
   std::vector<void (esphome::igrill::IGrill::*)(uint8_t *, uint16_t)> read_functions = {
       &IGrill::read_temperature1_, &IGrill::read_temperature2_, &IGrill::read_temperature3_,
       &IGrill::read_temperature4_};
+  std::vector<const char *> thresholds = {PROBE1_THRESHOLD, PROBE2_THRESHOLD, PROBE3_THRESHOLD, PROBE4_THRESHOLD};
+  std::vector<void (esphome::igrill::IGrill::*)(uint8_t *, uint16_t)> threshold_read_functions = {
+      &IGrill::read_threshold1_, &IGrill::read_threshold2_, &IGrill::read_threshold3_, &IGrill::read_threshold4_};
   for (int i = 0; i < this->num_probes; i++) {
     if (this->sensors_[i])  // only add handles for configured sensors
     {
@@ -169,6 +182,14 @@ void IGrill::add_temperature_probe_handles_(const char *service) {
       ESP_LOGV(TAG, "Probe number %d added with handle 0x%x", i, probe_handle);
     } else {
       ESP_LOGD(TAG, "No sensor configured for probe number %d. Skipping", i + 1);
+    }
+
+    if (this->threshold_numbers_[i])  // only add handles for configured threshold numbers
+    {
+      uint16_t threshold_handle = get_handle_(service, thresholds[i]);
+      this->threshold_handles_[i] = threshold_handle;
+      this->value_readers_[threshold_handle] = threshold_read_functions[i];
+      ESP_LOGV(TAG, "Threshold for probe number %d added with handle 0x%x", i, threshold_handle);
     }
   }
   if (service == PULSE_1000_TEMPERATURE_SERVICE_UUID || service == PULSE_2000_TEMPERATURE_SERVICE_UUID) {
@@ -270,6 +291,87 @@ void IGrill::read_temperature_(uint8_t *raw_value, uint16_t value_len, int probe
   }
 }
 
+void IGrill::read_threshold_(uint8_t *raw_value, uint16_t value_len, int probe) {
+  std::string hex_bytes;
+  char byte_str[4];
+  for (uint16_t i = 0; i < value_len; i++) {
+    snprintf(byte_str, sizeof(byte_str), "%02X ", raw_value[i]);
+    hex_bytes += byte_str;
+  }
+  if (value_len < 4) {
+    ESP_LOGW(TAG, "Threshold char for probe %d returned only %d bytes (expected 4), raw bytes: %s", probe,
+             value_len, hex_bytes.c_str());
+    return;
+  }
+  // The threshold characteristic holds two 16-bit little-endian fields:
+  // bytes[0:2] = low-alarm threshold (the app always disables this, writing
+  //              the UNPLUGGED_PROBE_CONSTANT sentinel), and
+  // bytes[2:4] = high-alarm threshold, i.e. the actual target temperature.
+  uint16_t low_raw = (raw_value[1] << 8) | raw_value[0];
+  uint16_t high_raw = (raw_value[3] << 8) | raw_value[2];
+  ESP_LOGD(TAG, "Parsing threshold from probe %d, raw bytes: %s (low=%d, high/target=%d)", probe, hex_bytes.c_str(),
+           low_raw, high_raw);
+  if (this->threshold_numbers_[probe] != nullptr) {
+    if (high_raw == UNPLUGGED_PROBE_CONSTANT) {
+      // No target temperature currently stored on the device for this probe
+      // (never set via the app or over BLE). Publish NAN so it shows as
+      // "unknown" rather than the raw sentinel value.
+      this->threshold_numbers_[probe]->publish_state(NAN);
+    } else {
+      this->threshold_numbers_[probe]->publish_state((float) high_raw);
+    }
+  }
+}
+
+void IGrill::write_threshold(int probe_num, float value) {
+  if (probe_num < 1 || probe_num > 4) {
+    ESP_LOGW(TAG, "Invalid probe number %d for threshold write", probe_num);
+    return;
+  }
+  uint16_t handle = this->threshold_handles_[probe_num - 1];
+  if (handle == 0) {
+    ESP_LOGW(TAG, "No threshold handle known for probe %d yet, is the device connected?", probe_num);
+    return;
+  }
+  if (this->node_state != esp32_ble_tracker::ClientState::ESTABLISHED) {
+    ESP_LOGW(TAG, "Not connected to iGrill, can't write threshold for probe %d", probe_num);
+    return;
+  }
+  // Matches the official app's payload format: two 16-bit little-endian
+  // fields. The low-alarm threshold is always disabled (sentinel value),
+  // and the high-alarm threshold carries the actual target temperature.
+  uint16_t low_raw = UNPLUGGED_PROBE_CONSTANT;
+  uint16_t high_raw = (uint16_t) value;
+  uint8_t payload[4] = {
+      (uint8_t) (low_raw & 0xFF),
+      (uint8_t) ((low_raw >> 8) & 0xFF),
+      (uint8_t) (high_raw & 0xFF),
+      (uint8_t) ((high_raw >> 8) & 0xFF),
+  };
+  ESP_LOGD(TAG, "Writing threshold %d to probe %d (handle 0x%x), payload: %02X %02X %02X %02X", high_raw, probe_num,
+           handle, payload[0], payload[1], payload[2], payload[3]);
+  auto status =
+      esp_ble_gattc_write_char(this->parent()->get_gattc_if(), this->parent()->get_conn_id(), handle, sizeof(payload),
+                               payload, ESP_GATT_WRITE_TYPE_RSP, ESP_GATT_AUTH_REQ_NONE);
+  if (status) {
+    ESP_LOGW(TAG, "Error writing threshold char at handle 0x%x, status=%d", handle, status);
+  }
+}
+
+void IGrillThresholdNumber::control(float value) {
+  // Optimistically reflect the new value immediately; the next poll cycle
+  // will read the value back from the device and correct it if the write
+  // failed for some reason (e.g. disconnected).
+  this->publish_state(value);
+  if (this->parent_ != nullptr) {
+    this->parent_->write_threshold(this->probe_num_, value);
+  } else {
+    ESP_LOGW("igrill.number", "IGrillThresholdNumber has no parent IGrill set");
+  }
+}
+
+void IGrillThresholdNumber::dump_config() { LOG_NUMBER("  ", "IGrill Threshold", this); }
+
 void IGrill::update() {
   switch (this->node_state) {
     case esp32_ble_tracker::ClientState::ESTABLISHED:
@@ -354,6 +456,19 @@ void IGrill::request_read_values_() {
     }
   }
 
+  // Read threshold (target/alarm) values for any configured probes
+  for (int i = 0; i < this->num_probes; i++) {
+    if (this->threshold_numbers_[i] != nullptr && this->threshold_handles_[i] != 0) {
+      ESP_LOGV(TAG, "Requesting read of threshold on handle (0x%x)", this->threshold_handles_[i]);
+      status = esp_ble_gattc_read_char(this->parent()->get_gattc_if(), this->parent()->get_conn_id(),
+                                       this->threshold_handles_[i], ESP_GATT_AUTH_REQ_NONE);
+      if (status) {
+        ESP_LOGW(TAG, "Error sending read request for threshold, status=%d, handle=0x%x", status,
+                 this->threshold_handles_[i]);
+      }
+    }
+  }
+
   // Read propane level
   if (this->propane_level_sensor_ != nullptr) {
     ESP_LOGV(TAG, "Requesting read of propane level on handle (0x%x)", this->propane_level_handle_);
@@ -411,6 +526,11 @@ void IGrill::dump_config() {
   }
   if (this->pulse_heating_setpoint2_ != nullptr) {
     LOG_SENSOR("  ", "Pulse heating setpoint 2", this->pulse_heating_setpoint2_);
+  }
+  for (auto &threshold_number : this->threshold_numbers_) {
+    if (threshold_number) {
+      LOG_NUMBER("  ", "Threshold", threshold_number);
+    }
   }
 }
 

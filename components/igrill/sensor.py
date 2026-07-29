@@ -13,12 +13,8 @@ from esphome.const import (
     UNIT_CELSIUS,
 )
 
-DEPENDENCIES = ["ble_client"]
+from . import igrill_ns, IGrill
 
-igrill_ns = cg.esphome_ns.namespace("igrill")
-IGrill = igrill_ns.class_(
-    "IGrill", cg.PollingComponent, ble_client.BLEClientNode
-)
 CONF_SEND_VALUE_WHEN_UNPLUGGED = "send_value_when_unplugged"
 CONF_UNPLUGGED_PROBE_VALUE = "unplugged_probe_value"
 CONF_PROPANE_LEVEL = "propane_level"

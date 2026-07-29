@@ -3,6 +3,7 @@
 
 #include <esp_gattc_api.h>
 #include <algorithm>
+#include <cmath>
 #include <iterator>
 #include <map>
 #include <string>
@@ -10,6 +11,7 @@
 #include "esphome/components/ble_client/ble_client.h"
 #include "esphome/components/esp32_ble_tracker/esp32_ble_tracker.h"
 #include "esphome/components/sensor/sensor.h"
+#include "esphome/components/number/number.h"
 #include "esphome/core/component.h"
 #include "esphome/core/log.h"
 
@@ -35,6 +37,14 @@ static const char *const PROBE1_TEMPERATURE = "06ef0002-2e06-4b79-9e33-fce2c4280
 static const char *const PROBE2_TEMPERATURE = "06ef0004-2e06-4b79-9e33-fce2c42805ec";
 static const char *const PROBE3_TEMPERATURE = "06ef0006-2e06-4b79-9e33-fce2c42805ec";
 static const char *const PROBE4_TEMPERATURE = "06ef0008-2e06-4b79-9e33-fce2c42805ec";
+// "Threshold" characteristics hold the alarm/target temperature for each probe.
+// They sit right after the corresponding temperature characteristic and are
+// both readable and writable. Writing to one of these is what makes the
+// iGrill itself sound its buzzer when the probe reaches that value.
+static const char *const PROBE1_THRESHOLD = "06ef0003-2e06-4b79-9e33-fce2c42805ec";
+static const char *const PROBE2_THRESHOLD = "06ef0005-2e06-4b79-9e33-fce2c42805ec";
+static const char *const PROBE3_THRESHOLD = "06ef0007-2e06-4b79-9e33-fce2c42805ec";
+static const char *const PROBE4_THRESHOLD = "06ef0009-2e06-4b79-9e33-fce2c42805ec";
 static const char *const PULSE_ELEMENT_UUID = "6c91000a-58dc-41c7-943f-518b278ceaaa";
 
 static const char *const PROPANE_LEVEL_SERVICE_UUID = "F5D40000-3548-4C22-9947-F3673FCE3CD9";
@@ -47,6 +57,24 @@ static const uint16_t UNPLUGGED_PROBE_CONSTANT = 63536;
 
 static const char *const FAHRENHEIT_UNIT_STRING = "°F";
 static const char *const CELCIUS_UNIT_STRING = "°C";
+
+class IGrill;
+
+// A number::Number entity representing one probe's alarm/target temperature.
+// Reading shows the value currently stored on the iGrill; writing (e.g. from
+// Home Assistant) pushes a new value to the device over BLE, which is what
+// arms the grill's own buzzer for that probe.
+class IGrillThresholdNumber : public number::Number, public Component {
+ public:
+  void set_igrill_parent(IGrill *parent) { parent_ = parent; }
+  void set_probe_num(int probe_num) { probe_num_ = probe_num; }
+  void dump_config() override;
+
+ protected:
+  void control(float value) override;
+  IGrill *parent_{nullptr};
+  int probe_num_{0};
+};
 
 class IGrill : public PollingComponent, public ble_client::BLEClientNode {
  public:
@@ -64,11 +92,23 @@ class IGrill : public PollingComponent, public ble_client::BLEClientNode {
   void set_pulse_setpoint2(sensor::Sensor *pulse_setpoint) { pulse_heating_setpoint2_ = pulse_setpoint; }
   void set_propane(sensor::Sensor *propane) { propane_level_sensor_ = propane; }
   void set_battery(sensor::Sensor *battery) { battery_level_sensor_ = battery; }
-  // Removed stray ESP_LOGE debug call that was present in upstream v1.2
   void set_send_value_when_unplugged(bool send_value_when_unplugged) {
     send_value_when_unplugged_ = send_value_when_unplugged;
   }
   void set_unplugged_probe_value(float unplugged_probe_value) { unplugged_probe_value_ = unplugged_probe_value; }
+
+  // Registers a threshold/alarm number entity for a given probe (1-4) and
+  // wires it back to this IGrill instance so writes can reach the device.
+  void set_temperature_threshold(IGrillThresholdNumber *number, int probe_num) {
+    threshold_numbers_[probe_num - 1] = number;
+    number->set_igrill_parent(this);
+    number->set_probe_num(probe_num);
+  }
+
+  // Called by IGrillThresholdNumber::control() when the user sets a new
+  // target temperature. Writes the raw 2-byte little-endian value to the
+  // probe's threshold characteristic on the iGrill.
+  void write_threshold(int probe_num, float value);
 
  protected:
   void detect_and_init_igrill_model_();
@@ -85,6 +125,11 @@ class IGrill : public PollingComponent, public ble_client::BLEClientNode {
   void read_temperature3_(uint8_t *value, uint16_t value_len) { read_temperature_(value, value_len, 2); }
   void read_temperature4_(uint8_t *value, uint16_t value_len) { read_temperature_(value, value_len, 3); }
   void read_temperature_(uint8_t *value, uint16_t value_len, int probe);
+  void read_threshold1_(uint8_t *value, uint16_t value_len) { read_threshold_(value, value_len, 0); }
+  void read_threshold2_(uint8_t *value, uint16_t value_len) { read_threshold_(value, value_len, 1); }
+  void read_threshold3_(uint8_t *value, uint16_t value_len) { read_threshold_(value, value_len, 2); }
+  void read_threshold4_(uint8_t *value, uint16_t value_len) { read_threshold_(value, value_len, 3); }
+  void read_threshold_(uint8_t *value, uint16_t value_len, int probe);
   void request_read_values_();
   void request_temp_unit_read_();
   void request_device_challenge_read_();
@@ -103,6 +148,9 @@ class IGrill : public PollingComponent, public ble_client::BLEClientNode {
   sensor::Sensor *pulse_heating_actual2_{nullptr};
   sensor::Sensor *pulse_heating_setpoint1_{nullptr};
   sensor::Sensor *pulse_heating_setpoint2_{nullptr};
+
+  std::vector<IGrillThresholdNumber *> threshold_numbers_ = {nullptr, nullptr, nullptr, nullptr};
+  std::vector<uint16_t> threshold_handles_ = {0, 0, 0, 0};
 
   uint16_t app_challenge_handle_;
   uint16_t battery_level_handle_;
